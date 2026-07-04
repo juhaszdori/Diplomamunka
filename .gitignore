@@ -67,3 +67,44 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# Visual Studio directories
+.vs/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+# Build outputs (MSBuild / VS)
+bin/
+obj/
+out/
+publish/
+
+# Visual Studio cache / temp
+*.VC.db
+*.VC.VC.opendb
+
+# ReSharper (ha használod)
+_ReSharper*/
+*.DotSettings.user
+
+# Visual Studio Code (ha vegyesen használod)
+.vscode/
+
+# NuGet (csak régebbi projektekhez)
+packages/
+
+# Test results
+TestResults/
+[Tt]est[Rr]esult*/
+*.trx
+
+# MSBuild log / temp artifacts
+msbuild.log
+
+# Architecture-specific build outputs
+x64/
+x86/
