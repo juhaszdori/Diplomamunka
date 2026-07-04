@@ -46,7 +46,7 @@ void CSVReader::Trim( std::string& strParam )
 	//strParam.erase( 0, strParam.find_first_not_of( " \n\r\t" ) );
 	//strParam.erase( strParam.find_last_not_of( " \n\r\t" ) + 1 );
 
-	std::size_t first = strParam.find_first_not_of(" \n\r\t");
+	std::size_t first = strParam.find_first_not_of( " \n\r\t" );
 
 	if( first == std::string::npos )
 	{
@@ -132,7 +132,7 @@ int CSVReader::FindColumn( const std::string& strColumn ) const
 {
 	for( int i = 0; i < m_vHeader.size(); i++ )
 	{
-		if( m_vHeader.at( i ) == strColumn)
+		if( m_vHeader.at( i ) == strColumn )
 			return i;
 	}
 
