@@ -2,14 +2,12 @@
 #include <map>
 #include <vector>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
-
 #include "CSVReader.h"
 #include "Parser.h"
 #include "Domain.h"
-
-using namespace std;
 
 /*vector<ProductionEvent> ReadInputCSV(const string& strFileName)
 {
@@ -114,25 +112,25 @@ using namespace std;
 
 struct MaterialConsumption // termelési jelentés felhasznált típusú tétel
 {
-	string strTaskId;
-	string strMaterialId;
+	std::string strTaskId;
+	std::string strMaterialId;
 	double dUsedQuantity;
 	double dProducedQuantity;
-	string strProductId;
+	std::string strProductId;
 };
 
 struct JobInfoItem
 {
-	string strTaskId;
+	std::string strTaskId;
 	int iSequence;
-	string strOperationId;
+	std::string strOperationId;
 	tm dtStartTime; // min prodrep time
 	tm dtEndTime;    // max
-	vector<string> vMachines;
-	vector<MaterialConsumption> vMaterials;
+	std::vector<std::string> vMachines;
+	std::vector<MaterialConsumption> vMaterials;
 };
 
-struct OperationForProduct {
+/*struct OperationForProduct {
 
 	string strProductId;
 	string strOperationId;
@@ -140,7 +138,31 @@ struct OperationForProduct {
 	double dOperationTime;
 	vector<string> vMachines;
 	//int occurrence_count;
-};
+};*/
+
+void PrintEvents( const std::vector<ProductionEvent>& vProductionEvents )
+{
+	for( const auto& r : vProductionEvents )
+	{
+		std::tm tm;
+
+	#ifdef _WIN32
+			localtime_s(&tm, &r.tTimeStamp);
+	#else
+			localtime_r(&r.tTimeStamp, &tm);
+	#endif
+		std::cout << r.strTaskId      << " "
+			 << r.strProductId  << " "
+			 << r.strOperationId  << " "
+			 << r.dQuantity  << " "
+			 << r.strQuantityUnitId  << " "
+			 << r.strMaterialId  << " "
+			 << r.eEventType  << " "
+			 << r.strMachineId  << " "
+			 << std::put_time(&tm, "%Y-%m-%d %H:%M:%S")
+			<< std::endl;
+	}
+}
 
 std::vector<ProductionEvent> LoadProductionEvents( const std::string& strFileName )
 {
@@ -160,32 +182,74 @@ std::vector<ProductionEvent> LoadProductionEvents( const std::string& strFileNam
 	return vProductionEvents;
 }
 
-void BuildDataStructure( std::vector<ProductionEvent>& vProductionEvents )
+std::map<std::string, Product> BuildDataStructure( const std::vector<ProductionEvent>& vProductionEvents )
 {
+	std::map<std::string, Product> mapProducts;
+
 	for( const ProductionEvent& sProductionEvent : vProductionEvents )
 	{
 		mapProducts[sProductionEvent.strProductId].mapTasks[sProductionEvent.strTaskId].mapOperations[sProductionEvent.strOperationId].vEvents.push_back(sProductionEvent);
 	}
+
+	return mapProducts;
 }
 
-// std::map<std::string, Recipe> mapRecipes;
-// for loop:
-//	Recipe sRecipe = GenerateRecipe();
-// mapRecipes[sRecipe.strId] = sRecipe
-
-int main( int argc, char* argv[] )
+Recipe GenerateRecipeForProduct( const Product& sProduct )
 {
-	std::vector<ProductionEvent> vProductionEvents = LoadProductionEvents( "../../data/input/mf_march.csv" );
-	BuildDataStructure( vProductionEvents );
+	Recipe sRecipe;
 
 	//routing
-	for( const auto& pair : mapProducts )
-	{
-		string strProductId = pair.first;
 
-		cout << strProductId << endl;
+	for( const auto& task : sProduct.mapTasks )
+	{
+		std::string strTaskId = task.first;
+		const Task& sTask = task.second;
+
+		std::cout << "Task: " << strTaskId << std::endl;
+
+		
+		double dProducedQuantity = 0.0;
+
+		std::map<std::string, Job> mapJobs;  // task structnak odaadni?
+
+		for( const auto& operation : sTask.mapOperations )
+		{
+			std::string strOperationId = operation.first;
+			const Operation& sOperation = operation.second;
+
+			std::cout << "Operation: " << strOperationId << std::endl;
+
+			Job sJob;
+			
+			//az összes productionevent ugyanahhoz a taskhoz ugyanahhoz a munkához  megnézni a dSuiteban hogy hogy össezsíti a munkára az adatokat
+			for( const auto& event : sOperation.vEvents )
+			{
+				std::cout << "ProductionReportItem: " << event.strMaterialId << " " << event.dQuantity << std::endl << std::endl;
+
+				/*auto it = mapJobs.find(sOperation.strOperationId);
+
+				if (it == mapJobs.end())
+				{
+					Job sJob;
+				}
+				bool bIsNewItem = it != mapJobs.end();*/
+
+				if( event.eEventType == T_PRODUCT )
+					sJob.dProducedQuantity += event.dQuantity;
+				else if (event.eEventType == T_SCRAP)
+					sJob.dScrapQuantity += event.dQuantity;
+				else if( event.eEventType == T_INPUT )
+					sJob.mMaterials.insert( { event.strMaterialId, event.dQuantity } );
+
+				sJob.vMachines.push_back( event.strMachineId );
+
+				//if( event.tTimeStamp > dtBe g)
+					//sJob->iIntervall += dtEnd.GetValue() - dtBeg.GetValue();
+			}
+		}
 	}
-		/*STaskInfoItem sSTaskInfoItemFindData;
+
+	/*STaskInfoItem sSTaskInfoItemFindData;
 		sSTaskInfoItemFindData.strTaskId = strTaskId;
 		sSTaskInfoItemFindData.pOperation = pOperation;
 		sSTaskInfoItemFindData.pMachine = pMachine;
@@ -234,70 +298,31 @@ int main( int argc, char* argv[] )
 	}
 
 	m_listTaskInfoItem.Resort();
-		
+
+	}*/
+
+	return sRecipe;
+}
+
+int main( int argc, char* argv[] )
+{
+	std::vector<ProductionEvent> vProductionEvents = LoadProductionEvents( "../../data/input/mf_march.csv" );
+
+	PrintEvents( vProductionEvents );
+
+	std::map<std::string, Product> mapProducts = BuildDataStructure( vProductionEvents );
+
+	std::map<std::string, Recipe> mapRecipes;
+
+	for( const auto& pair : mapProducts )
+	{
+		Recipe sRecipe = GenerateRecipeForProduct( pair.second );
+		mapRecipes[sRecipe.strProductId] = sRecipe;
+
+		//cout << pair.first << endl;
 	}
 
-	for( const auto& pair : mTasks )
-	{
-		string strTaskId = pair.first;
-		const vector<ProductionEvent>& records = pair.second;
-
-		cout << "Task: " << strTaskId << endl;
-
-		for (const auto& r : records)
-		{
-			cout << r.strTaskId << " " << r.dQuantity << endl;
-		}
-	}*/
-
-	//routing
-
 	
-	/*for (const auto& pair : mTasks)
-	{
-		string strTaskId = pair.first;
-		const vector<ProductionEvent>& records = pair.second;
-
-		cout << "Task: " << strTaskId << endl;
-
-		double dProducedQuantity = 0.0;
-
-
-		for( const auto& r : records )
-		{
-			map<int, vector<ProductionEvent>> mJobs; //az összes productionevent ugyanahhoz a taskhoz ugyanahhoz a munkához  megnézni a dSuiteban hogy hogy össezsíti a munkára az adatokat
-
-			for (int iPos = 0; iPos < vProductionEvent.size(); iPos++)
-			{
-				ProductionEvent ProductionEvent = vProductionEvent[iPos];
-
-				mTasks[ProductionEvent.strTaskId].push_back(ProductionEvent);
-			}
-		}
-	}*/
-
-
-	
-	/*for (const auto& r : vProductionEvent)
-	{
-		std::tm tm;
-
-	#ifdef _WIN32
-			localtime_s(&tm, &r.tTimeStamp);
-	#else
-			localtime_r(&r.tTimeStamp, &tm);
-	#endif
-		cout << r.strTaskId      << " "
-			 << r.strProductId  << " "
-			 << r.strOperationId  << " "
-			 << r.dQuantity  << " "
-			 << r.strQuantityUnitId  << " "
-			 << r.strMaterialId  << " "
-			 << r.eEventType  << " "
-			 << r.strMachineId  << " "
-			 << std::put_time(&tm, "%Y-%m-%d %H:%M:%S")
-			<< endl;
-	}*/
 
 	return 0;
 }
