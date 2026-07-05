@@ -1,6 +1,6 @@
 #include "Parser.h"
 #include "CSVReader.h"
-#include "Domain.h"
+#include "Model.h"
 #include <sstream>
 #include <iomanip>
 

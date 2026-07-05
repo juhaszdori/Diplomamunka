@@ -128,16 +128,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BaseAlgorithm.cpp" />
     <ClCompile Include="CSVReader.cpp" />
-    <ClCompile Include="Domain.cpp" />
+    <ClCompile Include="DataLoader.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Evaluation.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="RecipeExport.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BaseAlgorithm.h" />
     <ClInclude Include="CSVReader.h" />
-    <ClInclude Include="Domain.h" />
+    <ClInclude Include="DataLoader.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="Evaluation.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="RecipeExport.h" />

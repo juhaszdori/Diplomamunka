@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Domain.h"
-#include "CSVREader.h"
+#include "Model.h"
+#include "CSVReader.h"
 
 class Parser
 {
