@@ -77,7 +77,9 @@ struct Product
 };
 
 struct MaterialDemand
-{		
+{
+	std::string strId;
+	std::string strRecipeItemId;
 	double       dRatio;
 	std::string  strMaterialId;
 	EBOMItemType eType;
@@ -91,6 +93,8 @@ struct MaterialDemand
 
 struct MachineDemand
 {
+	std::string strId;
+	std::string strRecipeItemId;
 	std::string strMachineId;
 	double      dOperationTime;
 	double      dBaseQuantity;
@@ -100,12 +104,17 @@ struct MachineDemand
 
 struct RecipeItem
 {
-	std::string        strOperationId;
+	std::string strId;
+	std::string strRecipeId;
+	std::string strOperationId;
+
 	int                iOrder;
 	double             dBaseQuantity;
 	std::string        strBaseQuantityUnitId;
 	double             dOperationTime;
 	EOperationTimeUnit eOperationTimeUnit;
+
+	bool               bSubcontracting = false;
 
 	std::vector<MachineDemand>  vMachineDemands;
 	std::vector<MaterialDemand> vMaterialDemands;
@@ -113,10 +122,19 @@ struct RecipeItem
 
 struct Recipe
 {
+	std::string strId;
 	std::string strProductId;
+	bool        bDefault = false;
 
 	std::vector<RecipeItem> vRecipeItems;
 };
+
+struct ProductRecipes
+{
+	std::vector<Recipe> vRecipes;
+};
+
+//vagy std::map<std::string, std::vector<Recipe>> mapRecipesByProduct;
 
 EEventType GetEventType( int iEventType );
 EBOMItemType GetBOMItemType( int iBOMItemType );

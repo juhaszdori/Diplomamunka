@@ -35,3 +35,14 @@ void CompareRecipes( const std::map<std::string, Recipe> mapGeneratedRecipes, st
 		}
 	}
 }
+
+/*const Recipe* pDefaultRecipe = nullptr;
+
+for (const Recipe& recipe : vRecipes)
+{
+	if (recipe.bDefault)
+	{
+		pDefaultRecipe = &recipe;
+		break;
+	}
+}*/

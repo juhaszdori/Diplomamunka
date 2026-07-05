@@ -7,15 +7,6 @@
 #include "DataLoader.h"
 #include "BaseAlgorithm.h"
 
-struct MaterialConsumption // termelési jelentés felhasznált típusú tétel
-{
-	std::string strTaskId;
-	std::string strMaterialId;
-	double dUsedQuantity;
-	double dProducedQuantity;
-	std::string strProductId;
-};
-
 void PrintEvents( const std::vector<ProductionEvent>& vProductionEvents )
 {
 	for( const auto& r : vProductionEvents )
@@ -40,7 +31,6 @@ void PrintEvents( const std::vector<ProductionEvent>& vProductionEvents )
 	}
 }
 
-
 int main( int argc, char* argv[] )
 {
 	std::vector<ProductionEvent> vProductionEvents = DataLoader::LoadProductionEvents( "../../data/input/mf_march.csv" );
@@ -49,6 +39,7 @@ int main( int argc, char* argv[] )
 
 	std::map<std::string, Product> mapProducts = DataLoader::BuildDataStructure( vProductionEvents );
 
+	//egybbõl hasonlítsuk össze a recepteket amikor létrehoztuk vagy egyben az összeset egy függvényben
 	std::map<std::string, Recipe> mapRecipes;
 
 	for( const auto& pair : mapProducts )

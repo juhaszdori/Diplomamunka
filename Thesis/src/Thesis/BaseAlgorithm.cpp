@@ -1,6 +1,15 @@
 #include "BaseAlgorithm.h"
 #include <iostream>
 
+struct MaterialConsumption // termelési jelentés felhasznált típusú tétel
+{
+	std::string strTaskId;
+	std::string strMaterialId;
+	double dUsedQuantity;
+	double dProducedQuantity;
+	std::string strProductId;
+};
+
 Recipe BaseAlgorithm::GenerateRecipeForProduct( const Product& sProduct )
 {
 	Recipe sRecipe;
