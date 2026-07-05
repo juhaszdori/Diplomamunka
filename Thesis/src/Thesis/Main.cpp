@@ -6,6 +6,7 @@
 #include "Model.h"
 #include "DataLoader.h"
 #include "BaseAlgorithm.h"
+#include "Evaluation.h"
 
 void PrintEvents( const std::vector<ProductionEvent>& vProductionEvents )
 {
@@ -37,10 +38,10 @@ int main( int argc, char* argv[] )
 
 	PrintEvents( vProductionEvents );
 
-	std::map<std::string, Product> mapProducts = DataLoader::BuildDataStructure( vProductionEvents );
+	std::unordered_map<std::string, Product> mapProducts = DataLoader::BuildDataStructure( vProductionEvents );
 
 	//egybbõl hasonlítsuk össze a recepteket amikor létrehoztuk vagy egyben az összeset egy függvényben
-	std::map<std::string, Recipe> mapRecipes;
+	std::unordered_map<std::string, Recipe> mapRecipes;
 
 	for( const auto& pair : mapProducts )
 	{
@@ -50,7 +51,9 @@ int main( int argc, char* argv[] )
 		//cout << pair.first << endl;
 	}
 
-	
+	std::unordered_map < std::string, Recipe> mapReferenceRecipes = DataLoader::LoadRecipeDatabase( "../../data/input" );
+
+	Evaluation::CompareRecipes( mapRecipes, mapReferenceRecipes );
 
 	return 0;
 }

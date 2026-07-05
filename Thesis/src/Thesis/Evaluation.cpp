@@ -1,9 +1,7 @@
-#include "evaluation.h"
+#include "Evaluation.h"
 #include <iostream>
-#include <map>
-#include "Model.h"
 
-void CompareRecipes( const std::map<std::string, Recipe> mapGeneratedRecipes, std::map<std::string, Recipe> mapReferenceRecipes )
+void Evaluation::CompareRecipes( const std::unordered_map<std::string, Recipe>& mapGeneratedRecipes, const std::unordered_map<std::string, Recipe>& mapReferenceRecipes )
 {
 	for( const auto& r : mapGeneratedRecipes )
 	{
