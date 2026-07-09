@@ -34,6 +34,25 @@ std::unordered_map<std::string, Product> DataLoader::BuildDataStructure( const s
 	return mapProducts;
 }
 
+
+std::vector<ProductionTimeData> DataLoader::LoadProductionTimeData( const std::string& strFileName )
+{
+	std::vector<ProductionTimeData> vProductionTimeData;
+
+	CSVReader csvReader;
+	csvReader.ReadCSV( strFileName );
+
+	Parser parser;
+
+	for( int iRow = 0; iRow < csvReader.GetRowCount(); iRow++ )
+	{
+		ProductionTimeData sProductionTimeData = parser.ParseProductionTimeData( csvReader, iRow );
+		vProductionTimeData.push_back( sProductionTimeData );
+	}
+
+	return vProductionTimeData;
+}
+
 std::unordered_map<std::string, Recipe> DataLoader::LoadRecipes( const std::string& strFileName )
 {
 	std::unordered_map<std::string, Recipe> mapRecipes;
@@ -134,7 +153,7 @@ void DataLoader::LinkRecipeStructure(
 		const MachineDemand& machineDemand = pair.second;
 		auto it = mapRecipeItems.find( machineDemand.strRecipeItemId );
 		if( it != mapRecipeItems.end() )
-			it->second.vMachineDemands.push_back(machineDemand);
+			it->second.vMachineDemands.push_back( machineDemand );
 	}
 
 	for( const auto& pair : mapMaterialDemands )

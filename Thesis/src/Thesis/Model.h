@@ -39,6 +39,18 @@ struct ProductionEvent
 	//double dOperationTime;
 };
 
+struct ProductionTimeData
+{
+	std::string strProductId;
+	std::string strTaskId;
+	std::string strOperationId;
+	std::string strMachineId;
+	time_t      tTimeBeg;
+	time_t      tTimeEnd;
+
+	double      dOperationTime;
+};
+
 struct Job
 {
 	std::string strOperationId;
@@ -78,13 +90,13 @@ struct Product
 
 struct MaterialDemand
 {
-	std::string strId;
-	std::string strRecipeItemId;
-	double       dRatio;
+	std::string  strId;
+	std::string  strRecipeItemId;
 	std::string  strMaterialId;
 	EBOMItemType eType;
 	double       dPiece;
 	double       dBaseQuantity;
+	std::string strBaseQuantityUnitId;
 
 	/*bool bMainRawMaterial;
 	bool bAlternativeAllowed;
@@ -114,7 +126,7 @@ struct RecipeItem
 	double             dOperationTime;
 	EOperationTimeUnit eOperationTimeUnit;
 
-	bool               bSubcontracting = false;
+	//E               type = false;
 
 	std::vector<MachineDemand>  vMachineDemands;
 	std::vector<MaterialDemand> vMaterialDemands;
