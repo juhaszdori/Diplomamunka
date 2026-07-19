@@ -8,8 +8,8 @@
 class DataLoader
 {
 public:
-	static std::vector<ProductionEvent> LoadProductionEvents(   const std::string& strFileName );
-	static std::vector<ProductionEvent> LoadProductionTimeData( const std::string& strFileName );
+	static std::vector<ProductionEvent>    LoadProductionEvents(   const std::string& strFileName );
+	static std::vector<ProductionTimeData> LoadProductionTimeData( const std::string& strFileName );
 	static std::unordered_map<std::string, Product> BuildDataStructure( const std::vector<ProductionEvent>& vProductionEvents );
 
 	static std::unordered_map<std::string, Recipe>         LoadRecipes(         const std::string& strFileName );

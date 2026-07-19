@@ -47,6 +47,9 @@ std::vector<ProductionTimeData> DataLoader::LoadProductionTimeData( const std::s
 	for( int iRow = 0; iRow < csvReader.GetRowCount(); iRow++ )
 	{
 		ProductionTimeData sProductionTimeData = parser.ParseProductionTimeData( csvReader, iRow );
+
+		sProductionTimeData.dOperationTime = difftime( sProductionTimeData.tTimeEnd, sProductionTimeData.tTimeBeg );
+
 		vProductionTimeData.push_back( sProductionTimeData );
 	}
 

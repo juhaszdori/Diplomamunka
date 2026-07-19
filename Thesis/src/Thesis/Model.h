@@ -5,15 +5,32 @@
 #include <map>
 #include <set>
 
-enum EOperationTimeUnit {
-	TU_SECOND = 0
-};
-
 enum EEventType
 {
-	T_PRODUCT = 0,
-	T_INPUT = 1,
-	T_SCRAP = 2
+	T_PRODUCT,                                                 // Elkészített termék
+	T_INPUT,                                                   // Felhasznált anyag
+	T_SPINOFF,                                                 // Mellektermek
+	T_WASTE,                                                   // Hulladek
+	T_SCRAP,                                                   // Selejt
+	T_LEFTOVER                                                 // Maradék
+};
+
+enum ETimeUnit
+{
+	UN_MONTH,                                                  // time
+	UN_WEEK,                                                   // time
+	UN_DAY,                                                    // time
+	UN_HOUR,                                                   // time
+	UN_MINUTE,                                                 // time
+	UN_SECOND,                                                 // time
+	UN_MILLISECOND                                             // time
+};
+
+enum EProductionMode
+{
+	PM_OWN_PRODCUTION,                                         // Saját gyártás
+	PM_OUTSOURCING,                                            // Kihelyezett
+	PM_BOTH                                                    // Mindketto
 };
 
 enum EBOMItemType
@@ -23,6 +40,13 @@ enum EBOMItemType
 	BIT_WASTE,                               // Hulladek
 	BIT_LEFTOVER                             // Maradék
 };
+
+/*enum EWorkingType
+{
+	WT_NORMAL,                                                 // Normál
+	WT_REPAIR,                                                 // Javítás
+	WT_PREPARE,                                                // Elõkészítés
+};*/
 
 struct ProductionEvent
 {
@@ -41,6 +65,7 @@ struct ProductionEvent
 
 struct ProductionTimeData
 {
+	//std::string strId;
 	std::string strProductId;
 	std::string strTaskId;
 	std::string strOperationId;
@@ -62,12 +87,17 @@ struct Job
 
 	int iInterval = 0;
 
-	double dProducedQuantity = 0.0;
-	double dScrapQuantity = 0.0;
+	int iEventCount = 0;
 
-	std::map<std::string, double> mMaterials;
+	//double dProducedQuantity = 0.0;
+	//double dScrapQuantity = 0.0;
 
-	std::set<std::string> vMachines;
+	double dPieceGood = 0.0;
+	double dPieceScrap = 0.0;
+
+	std::map<std::string, double> mapMaterialConsumptions;
+
+	std::set<std::string> vUsedMachines;
 };
 
 struct Operation
@@ -120,13 +150,13 @@ struct RecipeItem
 	std::string strRecipeId;
 	std::string strOperationId;
 
-	int                iOrder;
-	double             dBaseQuantity;
-	std::string        strBaseQuantityUnitId;
-	double             dOperationTime;
-	EOperationTimeUnit eOperationTimeUnit;
-
-	//E               type = false;
+	int             iOrder;
+	double          dBaseQuantity;
+	std::string     strBaseQuantityUnitId;
+	double          dOperationTime;
+	ETimeUnit       eOperationTimeUnit;
+	EProductionMode eProductionMode;
+	double          dRunningScrap;
 
 	std::vector<MachineDemand>  vMachineDemands;
 	std::vector<MaterialDemand> vMaterialDemands;
@@ -148,5 +178,17 @@ struct ProductRecipes
 
 //vagy std::map<std::string, std::vector<Recipe>> mapRecipesByProduct;
 
-EEventType GetEventType( int iEventType );
-EBOMItemType GetBOMItemType( int iBOMItemType );
+//EEventType GetEventType( int iEventType );
+//EBOMItemType GetBOMItemType( int iBOMItemType );
+
+struct AggregatedOperationData
+{
+	int iJobCount = 0;
+	std::string strOperationId;
+    double dProducedQuantity = 0.0;
+    double dScrapQuantity = 0.0;
+    std::map<std::string, double> mapMaterials; // T_INPUT, T_SPINOFF, T_WASTE, T_LEFTOVER
+	std::map<std::string, int> mapMaterialCounts;
+    std::map<std::string, double> mapOperationTimesByMachine;
+    std::set<std::string> vMachines;
+};

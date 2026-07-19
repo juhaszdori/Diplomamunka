@@ -1,6 +1,7 @@
 #include "Model.h"
+#include <assert.h>
 
-EEventType GetEventType( int iEventType )
+/*EEventType GetEventType(int iEventType)
 {
 	switch( iEventType )
 	{
@@ -11,7 +12,7 @@ EEventType GetEventType( int iEventType )
 		case 4:
 			return T_SCRAP;
 		default:
-			return T_PRODUCT; //fix
+			Assert( false && "Unknown event type" );
 	}
 }
 
@@ -28,4 +29,4 @@ EBOMItemType GetBOMItemType( int iBOMItemType )  //fix
 		default:
 			return BIT_LEFTOVER; //fix
 	}
-}
+}*/

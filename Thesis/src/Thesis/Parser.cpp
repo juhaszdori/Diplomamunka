@@ -28,7 +28,7 @@ ProductionEvent Parser::ParseProductionEvent( const CSVReader& csvReader, int iR
 	sProductionEvent.strQuantityUnitId = csvReader.GetField( "quantityunit", iRow );
 	
 	sProductionEvent.dQuantity = std::stod( csvReader.GetField( "quantity", iRow ) );
-	sProductionEvent.eEventType = GetEventType( std::stoi( csvReader.GetField( "eventtype", iRow ) ) );
+	sProductionEvent.eEventType = static_cast<EEventType>( std::stoi( csvReader.GetField( "eventtype", iRow ) ) );
 
 	sProductionEvent.tTimeStamp = ParseTimestamp( csvReader.GetField( "timestamp", iRow ) );
 
@@ -71,8 +71,10 @@ RecipeItem Parser::ParseRecipeItem( const CSVReader& csvReader, int iRow )
 	sRecipeItem.iOrder         = std::stoi( csvReader.GetField( "order"           , iRow ) );
 	sRecipeItem.dOperationTime = std::stod( csvReader.GetField( "operationtime"   , iRow ) );
 	sRecipeItem.dBaseQuantity  = std::stod( csvReader.GetField( "basequantity"    , iRow ) );
-	//sRecipeItem.eOperationTimeUnit = GetTimeUnit( std::stoi( csvReader.GetField( "operationtimeunit", iRow ) ) );
-	//sRecipeItem.eProductionMode = GetProductionMode( std::stoi( csvReader.GetField( "subcontracting", iRow ) ) );
+	sRecipeItem.dRunningScrap  = std::stod( csvReader.GetField( "runningscrap"    , iRow ) );
+
+	sRecipeItem.eOperationTimeUnit = static_cast<ETimeUnit>( std::stoi( csvReader.GetField( "operationtimeunit", iRow ) ) );
+	sRecipeItem.eProductionMode    = static_cast<EProductionMode>( std::stoi( csvReader.GetField( "productionmode", iRow ) ) );
 
 	return sRecipeItem;
 }
@@ -87,7 +89,8 @@ MaterialDemand Parser::ParseMaterialDemand( const CSVReader& csvReader, int iRow
 	sMaterialDemand.strBaseQuantityUnitId =            csvReader.GetField( "basequantityunit", iRow );
 	sMaterialDemand.dPiece                = std::stod( csvReader.GetField( "piece"           , iRow ) );
 	sMaterialDemand.dBaseQuantity         = std::stod( csvReader.GetField( "basequantity"    , iRow ) );
-	sMaterialDemand.eType = GetBOMItemType( std::stoi( csvReader.GetField( "type"            , iRow ) ) );
+
+	sMaterialDemand.eType = static_cast<EBOMItemType>( std::stoi( csvReader.GetField( "type" , iRow ) ) );
 
 	return sMaterialDemand;
 }

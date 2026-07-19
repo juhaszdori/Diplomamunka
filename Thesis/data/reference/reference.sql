@@ -27,7 +27,7 @@ ORDER BY
   	     --n_preparationtime  ::numeric / 10000 AS preparationtime,
   	     --n_changeovertime   ::numeric / 10000 AS changeovertime,
   	     --n_finalizationtime ::numeric / 10000 AS finalizationtime,
-  	     --n_runningscrap     ::numeric / 10000 AS runningscrap,
+  	     n_runningscrap     ::numeric / 10000 AS runningscrap,
   	     e_productionmode                  AS productionmode
     FROM 
          recipeitemtab 
