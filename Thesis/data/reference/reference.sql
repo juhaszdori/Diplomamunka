@@ -57,7 +57,7 @@ ORDER BY
 
 
   SELECT 
-         materialdemandgrouptab.id                          AS id,
+         materialdemandgrouptab.id_db                       AS id,
          materialdemandgrouptab.id_recipeitem               AS recipeitem,
 		     --materialdemandgrouptab.i_order                     AS "order",
 		     --materialdemandgrouptab.n_ratio ::numeric / 10000   AS ratio,

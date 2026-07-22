@@ -22,13 +22,18 @@ std::vector<ProductionEvent> DataLoader::LoadProductionEvents( const std::string
 	return vProductionEvents;
 }
 
-std::unordered_map<std::string, Product> DataLoader::BuildDataStructure( const std::vector<ProductionEvent>& vProductionEvents )
+std::unordered_map<std::string, Product> DataLoader::BuildDataStructure( const std::vector<ProductionEvent>& vProductionEvents, const std::vector<ProductionTimeData>& vProductionTimeData )
 {
 	std::unordered_map<std::string, Product> mapProducts;
 
 	for( const ProductionEvent& sProductionEvent : vProductionEvents )
 	{
 		mapProducts[sProductionEvent.strProductId].mapTasks[sProductionEvent.strTaskId].mapOperations[sProductionEvent.strOperationId].vEvents.push_back( sProductionEvent );
+	}
+
+	for( const ProductionTimeData& sProductionTimeData : vProductionTimeData )
+	{
+		mapProducts[sProductionTimeData.strProductId].mapTasks[sProductionTimeData.strTaskId].mapOperations[sProductionTimeData.strOperationId].vProductionTimes.push_back( sProductionTimeData );
 	}
 
 	return mapProducts;

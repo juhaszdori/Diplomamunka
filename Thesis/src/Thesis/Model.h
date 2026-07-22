@@ -50,9 +50,10 @@ enum EBOMItemType
 
 struct ProductionEvent
 {
-	std::string strTaskId;
 	std::string strProductId;
+	std::string strTaskId;
 	std::string strOperationId;
+
 	double      dQuantity;
 	std::string strQuantityUnitId;
 	std::string strMaterialId;
@@ -65,16 +66,37 @@ struct ProductionEvent
 
 struct ProductionTimeData
 {
-	//std::string strId;
 	std::string strProductId;
 	std::string strTaskId;
 	std::string strOperationId;
+
 	std::string strMachineId;
+
 	time_t      tTimeBeg;
 	time_t      tTimeEnd;
 
 	double      dOperationTime;
 };
+
+struct ProductionInterval
+{
+	std::string strProductId;
+	std::string strTaskId;
+	std::string strOperationId;
+
+	std::string strMachineId;
+
+	time_t tTimeBeg;
+	time_t tTimeEnd;
+
+	double dOperationTime;
+
+	double dProducedQuantity = 0;
+	double dScrapQuantity = 0;
+
+	//std::map<std::string, double> mapMaterials;
+};
+
 
 struct Job
 {
@@ -82,28 +104,31 @@ struct Job
 	std::string strProductId;
 	std::string strTaskId;
 
-	time_t tBegin = {};
-	time_t tEnd = {};
-
-	int iInterval = 0;
-
 	int iEventCount = 0;
 
-	//double dProducedQuantity = 0.0;
-	//double dScrapQuantity = 0.0;
+	int iOrder;
+
+	//time_t tBegin = {};
+	//time_t tEnd = {};
+	//
+	//int iInterval = 0;
 
 	double dPieceGood = 0.0;
 	double dPieceScrap = 0.0;
 
 	std::map<std::string, double> mapMaterialConsumptions;
-
 	std::set<std::string> vUsedMachines;
+
+	std::vector<ProductionInterval> vProductionIntervals;
+
+	std::map<std::string, double> mapOperationTimesByMachine;
 };
 
 struct Operation
 {
 	std::string strOperationId;
 	std::vector<ProductionEvent> vEvents;
+	std::vector<ProductionTimeData> vProductionTimes;
 };
 
 struct Task
@@ -156,7 +181,7 @@ struct RecipeItem
 	double          dOperationTime;
 	ETimeUnit       eOperationTimeUnit;
 	EProductionMode eProductionMode;
-	double          dRunningScrap;
+	double          dRunningScrap = 0.0;
 
 	std::vector<MachineDemand>  vMachineDemands;
 	std::vector<MaterialDemand> vMaterialDemands;
@@ -179,16 +204,25 @@ struct ProductRecipes
 //vagy std::map<std::string, std::vector<Recipe>> mapRecipesByProduct;
 
 //EEventType GetEventType( int iEventType );
-//EBOMItemType GetBOMItemType( int iBOMItemType );
+//EBOMItemType GetBOMItemType( int iBOMItemType 
+
+struct MachineInfo
+{
+	double dTotalOperationTime = 0.0;
+	int iIntervalCount = 0;
+	double dProducedQuantity = 0.0;
+	double dScrapQuantity = 0.0;
+};
 
 struct AggregatedOperationData
 {
 	int iJobCount = 0;
+	int iOrder;
 	std::string strOperationId;
     double dProducedQuantity = 0.0;
     double dScrapQuantity = 0.0;
     std::map<std::string, double> mapMaterials; // T_INPUT, T_SPINOFF, T_WASTE, T_LEFTOVER
 	std::map<std::string, int> mapMaterialCounts;
-    std::map<std::string, double> mapOperationTimesByMachine;
+    std::map<std::string, MachineInfo> mapMachineInfos;
     std::set<std::string> vMachines;
 };

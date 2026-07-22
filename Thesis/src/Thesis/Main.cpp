@@ -32,20 +32,48 @@ void PrintEvents( const std::vector<ProductionEvent>& vProductionEvents )
 	}
 }
 
+void PrintTimes( const std::vector<ProductionTimeData>& vProductionTimes )
+{
+	for( const auto& r : vProductionTimes )
+	{
+		std::tm tmBeg, tmEnd;
+	#ifdef _WIN32
+			localtime_s(&tmBeg, &r.tTimeBeg);
+			localtime_s(&tmEnd, &r.tTimeEnd);
+	#else
+			localtime_r(&r.tTimeBeg, &tmBeg);
+			localtime_r(&r.tTimeEnd, &tmEnd);
+	#endif
+		std::cout << r.strTaskId      << " "
+			 << r.strProductId  << " "
+			 << r.strOperationId  << " "
+			 << r.strMachineId  << " "
+			 << std::put_time(&tmBeg, "%Y-%m-%d %H:%M:%S")  << " "
+			 << std::put_time(&tmEnd, "%Y-%m-%d %H:%M:%S")  << " "
+			 << r.dOperationTime
+			<< std::endl;
+	}
+}
+
 int main( int argc, char* argv[] )
 {
-	std::vector<ProductionEvent> vProductionEvents = DataLoader::LoadProductionEvents( "../../data/input/mf_march.csv" );
+	std::vector<ProductionEvent>    vProductionEvents = DataLoader::LoadProductionEvents(  "../../data/input/events0301.csv" );
+	std::vector<ProductionTimeData> vProductionTimes  = DataLoader::LoadProductionTimeData( "../../data/input/times0301.csv" );
 
 	PrintEvents( vProductionEvents );
+	PrintTimes( vProductionTimes );
 
-	std::unordered_map<std::string, Product> mapProducts = DataLoader::BuildDataStructure( vProductionEvents );
+	std::unordered_map<std::string, Product> mapProducts = DataLoader::BuildDataStructure( vProductionEvents, vProductionTimes );
 
 	//egybbõl hasonlítsuk össze a recepteket amikor létrehoztuk vagy egyben az összeset egy függvényben
 	std::unordered_map<std::string, Recipe> mapRecipes;
 
 	for( const auto& pair : mapProducts )
 	{
-		Recipe sRecipe = BaseAlgorithm::GenerateRecipeForProduct( pair.second );
+		const Product& sProduct = pair.second;
+
+		//BaseAlgorithm::AttachProductionTimesToEvents();
+		Recipe sRecipe = BaseAlgorithm::GenerateRecipeForProduct( sProduct );
 		mapRecipes[sRecipe.strProductId] = sRecipe;
 
 		//cout << pair.first << endl;
