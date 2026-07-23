@@ -109,7 +109,7 @@ struct Job
 	int iOrder;
 
 	//time_t tBegin = {};
-	//time_t tEnd = {};
+	time_t tEnd = {};
 	//
 	//int iInterval = 0;
 
@@ -217,7 +217,7 @@ struct MachineInfo
 struct AggregatedOperationData
 {
 	int iJobCount = 0;
-	int iOrder;
+	std::vector<int> vOperationOrders;
 	std::string strOperationId;
     double dProducedQuantity = 0.0;
     double dScrapQuantity = 0.0;

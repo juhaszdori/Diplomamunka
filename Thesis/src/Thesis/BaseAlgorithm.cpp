@@ -1,9 +1,9 @@
 #include "BaseAlgorithm.h"
 #include <iostream>
+#include <algorithm>
 
 //kiszámolja gyártási intervallumokra  a mennyiségeket
 std::vector<ProductionInterval> BaseAlgorithm::BuildProductionIntervals( const std::vector<ProductionEvent>& vProductionEvents, const std::vector<ProductionTimeData>& vProductionTimes )
-//void AttachProductionTimesToEvents( const Product& sProduct , const std::vector<ProductionTimeData>& vProductionTimes )
 {
 	std::vector<ProductionInterval> vecProductionIntervals;
 
@@ -44,7 +44,7 @@ std::vector<ProductionInterval> BaseAlgorithm::BuildProductionIntervals( const s
 	return vecProductionIntervals;
 }
 
-/*std::map<std::string, Operation> InfereOperationSequence(const Product& sProduct)
+/*std::map<std::string, Operation> InferOperationOrder(const Product& sProduct)
 {
 	std::map<std::string, std::set<std::string>> mapOperationPredecessors;
 	for( const auto& taskPair : sProduct.mapTasks )
@@ -65,15 +65,38 @@ std::vector<ProductionInterval> BaseAlgorithm::BuildProductionIntervals( const s
 	return mapOperationPredecessors;
 }*/
 
+int BaseAlgorithm::MostFrequentOrder( const std::vector<int>& vOrders )
+{
+	std::map<int, int> mapOrderCounts;
+
+	for( int order : vOrders )
+	{
+		mapOrderCounts[order]++;
+	}
+
+	int iMostFrequentOrder = -1;
+	int iMaxCount = 0;
+
+	for( const auto& pair : mapOrderCounts )
+	{
+		if( pair.second > iMaxCount)
+		{
+			iMaxCount = pair.second;
+			iMostFrequentOrder = pair.first;
+		}
+	}
+	return iMostFrequentOrder;
+}
+
 Recipe BaseAlgorithm::GenerateRecipeForProduct( const Product& sProduct )
 {
 	Recipe sRecipe;
 	sRecipe.strProductId = sProduct.strProductId;
 
-	std::map<std::string, std::set<std::string>> mapOperationPredecessors;
-
 	//BuildJobs(...)
 	std::map<std::tuple<std::string, std::string>, Job> mapJobs;
+
+	std::map<std::string, std::set<std::string>> mapOperationPredecessors;
 
 	//végig megyünk a termék összes gyártásán
 	for( const auto& task : sProduct.mapTasks )
@@ -82,6 +105,8 @@ Recipe BaseAlgorithm::GenerateRecipeForProduct( const Product& sProduct )
 		const Task& sTask = task.second;
 
 		std::cout << "Task: " << strTaskId << std::endl;
+
+		std::vector<Job*> vOperationsOrderedByTimestamp;
 
 		// aztán az összes mûveleten
 		for( const auto& operation : sTask.mapOperations )
@@ -104,10 +129,16 @@ Recipe BaseAlgorithm::GenerateRecipeForProduct( const Product& sProduct )
 				std::cout << "ProductionReportItem: " << event.strMaterialId << " " << event.dQuantity << std::endl << std::endl;
 
 				if( event.eEventType == T_PRODUCT && event.strProductId == event.strMaterialId )
+				{
 					sJob.dPieceGood += event.dQuantity;
+					sJob.tEnd = std::max( sJob.tEnd, event.tTimeStamp );
+				}
 
 				else if( event.eEventType == T_SCRAP )
+				{
 					sJob.dPieceScrap += event.dQuantity;
+					sJob.tEnd = std::max( sJob.tEnd, event.tTimeStamp );
+				}
 
 				else if( event.eEventType == T_INPUT && event.strProductId != event.strMaterialId )
 					sJob.mapMaterialConsumptions[event.strMaterialId] += abs( event.dQuantity );
@@ -115,9 +146,37 @@ Recipe BaseAlgorithm::GenerateRecipeForProduct( const Product& sProduct )
 				sJob.vUsedMachines.insert( event.strMachineId );
 			}
 
+			vOperationsOrderedByTimestamp.push_back( &sJob );
+
 			sJob.vProductionIntervals = BuildProductionIntervals( sOperation.vEvents, sOperation.vProductionTimes );
 			// ez most tartalmazza a terméknek a gyártási intervallumait, a mennyiségekkel együtt gépek szerint, de a gépekhez tartozó mûveleti idõt még nem számolja ki
 		}
+
+		std::sort( vOperationsOrderedByTimestamp.begin(), vOperationsOrderedByTimestamp.end(),
+			[]( const Job* j1, const Job* j2 )
+			{ 
+				return j1->tEnd < j2->tEnd; 
+			} );
+
+		/*if (a->tEnd != b->tEnd)
+			return a->tEnd < b->tEnd;
+
+		return a->strOperationId < b->strOperationId;*/
+
+		for( size_t i = 0; i < vOperationsOrderedByTimestamp.size(); ++i )
+		{
+			vOperationsOrderedByTimestamp[i]->iOrder = static_cast<int>(i + 1);
+		}
+
+		/*for (size_t i = 0; i < vOperationEndTimes.size(); ++i)
+		{
+			Job* pCurrentJob = vOperationEndTimes[i];
+			if( i > 0 )
+			{
+				Job* pPreviousJob = vOperationEndTimes[i - 1];
+				mapOperationPredecessors[pCurrentJob->strOperationId].insert( pPreviousJob->strOperationId );
+			}
+		}*/
 	}
 
 	//AggregateOperations(...)
@@ -149,6 +208,8 @@ Recipe BaseAlgorithm::GenerateRecipeForProduct( const Product& sProduct )
 		const Job& sJob = jobPair.second;
 
 		AggregatedOperationData& sAggregatedOperation = mapOperations[sJob.strOperationId];
+
+		sAggregatedOperation.vOperationOrders.push_back( sJob.iOrder );
 
 		sAggregatedOperation.strOperationId = sJob.strOperationId;
 		sAggregatedOperation.iJobCount++;
@@ -212,7 +273,7 @@ Recipe BaseAlgorithm::GenerateRecipeForProduct( const Product& sProduct )
 		std::cout << std::endl;*/
 
 		RecipeItem sRecipeItem;
-		//sRecipeItem.iOrder = 
+		sRecipeItem.iOrder = MostFrequentOrder( sAggregatedOperation.vOperationOrders );
 		sRecipeItem.strOperationId = sAggregatedOperation.strOperationId;
 		sRecipeItem.dBaseQuantity = 1.0;
 

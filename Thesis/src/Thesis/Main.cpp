@@ -57,8 +57,8 @@ void PrintTimes( const std::vector<ProductionTimeData>& vProductionTimes )
 
 int main( int argc, char* argv[] )
 {
-	std::vector<ProductionEvent>    vProductionEvents = DataLoader::LoadProductionEvents(  "../../data/input/events0301.csv" );
-	std::vector<ProductionTimeData> vProductionTimes  = DataLoader::LoadProductionTimeData( "../../data/input/times0301.csv" );
+	std::vector<ProductionEvent>    vProductionEvents = DataLoader::LoadProductionEvents(  "../../data/input/events3.csv" );
+	std::vector<ProductionTimeData> vProductionTimes  = DataLoader::LoadProductionTimeData( "../../data/input/times3.csv" );
 
 	PrintEvents( vProductionEvents );
 	PrintTimes( vProductionTimes );
@@ -76,12 +76,13 @@ int main( int argc, char* argv[] )
 		Recipe sRecipe = BaseAlgorithm::GenerateRecipeForProduct( sProduct );
 		mapRecipes[sRecipe.strProductId] = sRecipe;
 
-		//cout << pair.first << endl;
+		std::cout << "Generated recipe for product: " << sProduct.strProductId << std::endl;
+
 	}
 
-	std::unordered_map < std::string, Recipe> mapReferenceRecipes = DataLoader::LoadRecipeDatabase( "../../data/input" );
+	//std::unordered_map < std::string, Recipe> mapReferenceRecipes = DataLoader::LoadRecipeDatabase( "../../data/reference" );
 
-	Evaluation::CompareRecipes( mapRecipes, mapReferenceRecipes );
+	//Evaluation::CompareRecipes( mapRecipes, mapReferenceRecipes );
 
 	return 0;
 }
