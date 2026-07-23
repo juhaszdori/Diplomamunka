@@ -7,6 +7,7 @@
 #include "DataLoader.h"
 #include "BaseAlgorithm.h"
 #include "Evaluation.h"
+#include "RecipeExport.h"
 
 void PrintEvents( const std::vector<ProductionEvent>& vProductionEvents )
 {
@@ -82,6 +83,12 @@ int main( int argc, char* argv[] )
 	//std::unordered_map < std::string, Recipe> mapReferenceRecipes = DataLoader::LoadRecipeDatabase( "../../data/reference" );
 
 	//Evaluation::CompareRecipes( mapRecipes, mapReferenceRecipes );
+
+	RecipeExport exporter;
+	exporter.WriteRecipes( "../../data/output/recipes.csv", mapRecipes );
+	exporter.WriteRecipeItems( "../../data/output/recipeitems.csv", mapRecipes );
+	exporter.WriteMachineDemands( "../../data/output/machinedemands.csv", mapRecipes );
+	exporter.WriteMaterialDemands( "../../data/output/materialdemands.csv", mapRecipes );
 
 	return 0;
 }

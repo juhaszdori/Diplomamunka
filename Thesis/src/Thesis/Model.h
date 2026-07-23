@@ -176,7 +176,7 @@ struct RecipeItem
 	std::string     strBaseQuantityUnitId;
 	double          dOperationTime =0.0;
 	ETimeUnit       eOperationTimeUnit = UN_SECOND;
-	EProductionMode eProductionMode = PM_OWN_PRODCUTION;;
+	EProductionMode eProductionMode = PM_OWN_PRODCUTION;
 	double          dRunningScrap = 0.0;
 
 	std::vector<MachineDemand>  vMachineDemands;

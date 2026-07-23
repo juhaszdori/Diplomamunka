@@ -182,7 +182,7 @@ void RecipeExport::WriteRecipeItems( const std::string& strFileName, const std::
 {
 	OpenCSV( strFileName );
 
-	WriteHeader( { "id", "i_order", "id_operation", "id_recipe", "n_operationtime", "e_operationtimeunit", "n_basequantity", "id_basequantityunit", "e_productionmode", "n_runningscrap" } );
+	WriteHeader( { "id", "order", "operation", "recipe", "operationtime", "operationtimeunit", "basequantity", "basequantityunit", "productionmode", "runningscrap" } );
 
 	for( const auto& pair : mapRecipes )
 	{
@@ -219,7 +219,6 @@ void RecipeExport::WriteMaterialDemands( const std::string& strFileName, const s
 {
 	OpenCSV( strFileName );
 
-	// Mivel a Model.h-ban nincs `dRatio`, de van `strBaseQuantityUnitId` a MaterialDemand-ban, erre alakítottam a fejlécet:
 	WriteHeader( { "id", "recipeitem", "material", "piece", "basequantity", "basequantityunit", "type" } );
 
 	for( const auto& pair : mapRecipes )

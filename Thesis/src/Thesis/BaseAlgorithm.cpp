@@ -10,6 +10,15 @@ std::vector<ProductionInterval> BaseAlgorithm::BuildProductionIntervals( const s
 
 	for( const auto& timeData : vProductionTimes )
 	{
+		if( timeData.tTimeBeg > timeData.tTimeEnd )
+		{
+			std::cerr << "Warning: Invalid time data for task " << timeData.strTaskId
+				<< ", operation " << timeData.strOperationId
+				<< ", machine " << timeData.strMachineId
+				<< ". Start time is after end time." << std::endl;
+			continue;
+		}
+
 		ProductionInterval sInterval;
 
 		sInterval.strTaskId = timeData.strTaskId;
@@ -93,6 +102,7 @@ Recipe BaseAlgorithm::GenerateRecipeForProduct( const Product& sProduct )
 {
 	Recipe sRecipe;
 	sRecipe.strProductId = sProduct.strProductId;
+	sRecipe.strId = "R_" + sProduct.strProductId;
 
 	//BuildJobs(...)
 	std::map<std::tuple<std::string, std::string>, Job> mapJobs;
@@ -274,9 +284,14 @@ Recipe BaseAlgorithm::GenerateRecipeForProduct( const Product& sProduct )
 		std::cout << std::endl;*/
 
 		RecipeItem sRecipeItem;
+		sRecipeItem.strRecipeId = sRecipe.strId;
+		sRecipeItem.strId = "RI_" + sProduct.strProductId + "_" + sAggregatedOperation.strOperationId;
 		sRecipeItem.iOrder = MostFrequentOrder( sAggregatedOperation.vOperationOrders );
 		sRecipeItem.strOperationId = sAggregatedOperation.strOperationId;
 		sRecipeItem.dBaseQuantity = 1.0;
+		sRecipeItem.eOperationTimeUnit = UN_SECOND;
+		sRecipeItem.eProductionMode = PM_OWN_PRODCUTION;
+		//sRecipeItem.strBaseQuantityUnitId = ;
 
 		if( dAveragePieceGood > 0 )
 			sRecipeItem.dRunningScrap = dAveragePieceScrap / dAveragePieceGood; // megnézni hogy arány vagy szám
@@ -292,6 +307,8 @@ Recipe BaseAlgorithm::GenerateRecipeForProduct( const Product& sProduct )
 			double dAverageUsedQuantity = dUsedQuantity / iNumMaterialOccurrences;
 			
 			MaterialDemand sMaterialDemand;
+			sMaterialDemand.strRecipeItemId = sRecipeItem.strId;
+			sMaterialDemand.strId = "MATD_" + sProduct.strProductId + "_" + strMaterialId + "_" + sAggregatedOperation.strOperationId;
 			sMaterialDemand.strMaterialId = strMaterialId;
 			sMaterialDemand.eType = BIT_INPUT;
 			sMaterialDemand.dBaseQuantity = 1.0;
@@ -308,9 +325,11 @@ Recipe BaseAlgorithm::GenerateRecipeForProduct( const Product& sProduct )
 			const MachineInfo& sMachineInfo = machineInfoPair.second;
 
 			MachineDemand sMachineDemand;
-
+			sMachineDemand.strRecipeItemId = sRecipeItem.strId;
+			sMachineDemand.strId = "MASD_" + sProduct.strProductId + "_" + strMachineId + "_" + sAggregatedOperation.strOperationId;
 			sMachineDemand.strMachineId = strMachineId;
 			sMachineDemand.dBaseQuantity = 1.0;
+			//sMachineDemand.strBaseQuantityUnitId = ;
 
 			double dTotalQuantity = sMachineInfo.dProducedQuantity + sMachineInfo.dScrapQuantity;
 
