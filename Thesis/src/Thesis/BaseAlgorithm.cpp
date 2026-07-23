@@ -1,6 +1,7 @@
 #include "BaseAlgorithm.h"
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 
 //kiszámolja gyártási intervallumokra  a mennyiségeket
 std::vector<ProductionInterval> BaseAlgorithm::BuildProductionIntervals( const std::vector<ProductionEvent>& vProductionEvents, const std::vector<ProductionTimeData>& vProductionTimes )
@@ -31,7 +32,7 @@ std::vector<ProductionInterval> BaseAlgorithm::BuildProductionIntervals( const s
 
 			if( event.tTimeStamp >= sInterval.tTimeBeg && event.tTimeStamp <= sInterval.tTimeEnd )
 			{
-				if( event.eEventType == T_PRODUCT && event.strProductId == event.strMaterialId )
+				if( event.eEventType == T_PRODUCT /* && event.strProductId == event.strMaterialId*/ )
 					sInterval.dProducedQuantity += event.dQuantity;
 
 				else if( event.eEventType == T_SCRAP )
@@ -128,7 +129,7 @@ Recipe BaseAlgorithm::GenerateRecipeForProduct( const Product& sProduct )
 			{
 				std::cout << "ProductionReportItem: " << event.strMaterialId << " " << event.dQuantity << std::endl << std::endl;
 
-				if( event.eEventType == T_PRODUCT && event.strProductId == event.strMaterialId )
+				if( event.eEventType == T_PRODUCT /* && event.strProductId == event.strMaterialId */ )
 				{
 					sJob.dPieceGood += event.dQuantity;
 					sJob.tEnd = std::max( sJob.tEnd, event.tTimeStamp );
@@ -141,7 +142,7 @@ Recipe BaseAlgorithm::GenerateRecipeForProduct( const Product& sProduct )
 				}
 
 				else if( event.eEventType == T_INPUT && event.strProductId != event.strMaterialId )
-					sJob.mapMaterialConsumptions[event.strMaterialId] += abs( event.dQuantity );
+					sJob.mapMaterialConsumptions[event.strMaterialId] += std::abs( event.dQuantity );
 
 				sJob.vUsedMachines.insert( event.strMachineId );
 			}

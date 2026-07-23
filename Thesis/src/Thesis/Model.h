@@ -89,12 +89,10 @@ struct ProductionInterval
 	time_t tTimeBeg;
 	time_t tTimeEnd;
 
-	double dOperationTime;
+	double dOperationTime = 0;
 
 	double dProducedQuantity = 0;
 	double dScrapQuantity = 0;
-
-	//std::map<std::string, double> mapMaterials;
 };
 
 
@@ -106,12 +104,10 @@ struct Job
 
 	int iEventCount = 0;
 
-	int iOrder;
+	int iOrder = -1;
 
 	//time_t tBegin = {};
 	time_t tEnd = {};
-	//
-	//int iInterval = 0;
 
 	double dPieceGood = 0.0;
 	double dPieceScrap = 0.0;
@@ -149,8 +145,8 @@ struct MaterialDemand
 	std::string  strRecipeItemId;
 	std::string  strMaterialId;
 	EBOMItemType eType;
-	double       dPiece;
-	double       dBaseQuantity;
+	double       dPiece = 0.0;
+	double       dBaseQuantity = 1.0;
 	std::string strBaseQuantityUnitId;
 
 	/*bool bMainRawMaterial;
@@ -163,8 +159,8 @@ struct MachineDemand
 	std::string strId;
 	std::string strRecipeItemId;
 	std::string strMachineId;
-	double      dOperationTime;
-	double      dBaseQuantity;
+	double      dOperationTime = 0.0;
+	double      dBaseQuantity = 1.0;
 	std::string strBaseQuantityUnitId;
 	//int iMachineOperationTime;
 };
@@ -175,12 +171,12 @@ struct RecipeItem
 	std::string strRecipeId;
 	std::string strOperationId;
 
-	int             iOrder;
-	double          dBaseQuantity;
+	int             iOrder = -1;
+	double          dBaseQuantity = 1.0;
 	std::string     strBaseQuantityUnitId;
-	double          dOperationTime;
-	ETimeUnit       eOperationTimeUnit;
-	EProductionMode eProductionMode;
+	double          dOperationTime =0.0;
+	ETimeUnit       eOperationTimeUnit = UN_SECOND;
+	EProductionMode eProductionMode = PM_OWN_PRODCUTION;;
 	double          dRunningScrap = 0.0;
 
 	std::vector<MachineDemand>  vMachineDemands;
@@ -202,9 +198,6 @@ struct ProductRecipes
 };
 
 //vagy std::map<std::string, std::vector<Recipe>> mapRecipesByProduct;
-
-//EEventType GetEventType( int iEventType );
-//EBOMItemType GetBOMItemType( int iBOMItemType 
 
 struct MachineInfo
 {

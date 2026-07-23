@@ -60,19 +60,18 @@ int main( int argc, char* argv[] )
 	std::vector<ProductionEvent>    vProductionEvents = DataLoader::LoadProductionEvents(  "../../data/input/events3.csv" );
 	std::vector<ProductionTimeData> vProductionTimes  = DataLoader::LoadProductionTimeData( "../../data/input/times3.csv" );
 
-	PrintEvents( vProductionEvents );
-	PrintTimes( vProductionTimes );
+	//PrintEvents( vProductionEvents );
+	//PrintTimes( vProductionTimes );
 
 	std::unordered_map<std::string, Product> mapProducts = DataLoader::BuildDataStructure( vProductionEvents, vProductionTimes );
 
-	//egybbõl hasonlítsuk össze a recepteket amikor létrehoztuk vagy egyben az összeset egy függvényben
+	//egybõl hasonlítsuk össze a recepteket amikor létrehoztuk vagy egyben az összeset egy függvényben
 	std::unordered_map<std::string, Recipe> mapRecipes;
 
 	for( const auto& pair : mapProducts )
 	{
 		const Product& sProduct = pair.second;
 
-		//BaseAlgorithm::AttachProductionTimesToEvents();
 		Recipe sRecipe = BaseAlgorithm::GenerateRecipeForProduct( sProduct );
 		mapRecipes[sRecipe.strProductId] = sRecipe;
 
