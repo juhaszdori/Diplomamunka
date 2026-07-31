@@ -60,7 +60,7 @@ struct ProductionEvent
 	EEventType  eEventType;
 	std::string strMachineId;
 	time_t      tTimeStamp;
-	//std::tm tmTimeStamp = {};
+
 	//double dOperationTime;
 };
 
@@ -93,6 +93,13 @@ struct ProductionInterval
 
 	double dProducedQuantity = 0;
 	double dScrapQuantity = 0;
+	std::string strQuantitiyUnitId;
+};
+
+struct MaterialConsumption
+{
+	double dUsedQuantity = 0.0;
+	std::string strQuantityUnitId;
 };
 
 
@@ -112,7 +119,9 @@ struct Job
 	double dPieceGood = 0.0;
 	double dPieceScrap = 0.0;
 
-	std::map<std::string, double> mapMaterialConsumptions;
+	std::string strQuantityUnitId;
+
+	std::map<std::string, MaterialConsumption> mapMaterialConsumptions;
 	std::set<std::string> vUsedMachines;
 
 	std::vector<ProductionInterval> vProductionIntervals;
@@ -205,6 +214,7 @@ struct MachineInfo
 	int iIntervalCount = 0;
 	double dProducedQuantity = 0.0;
 	double dScrapQuantity = 0.0;
+	std::string strQuantityUnitId;
 };
 
 struct AggregatedOperationData
@@ -214,7 +224,10 @@ struct AggregatedOperationData
 	std::string strOperationId;
     double dProducedQuantity = 0.0;
     double dScrapQuantity = 0.0;
-    std::map<std::string, double> mapMaterials; // T_INPUT, T_SPINOFF, T_WASTE, T_LEFTOVER
+
+	std::string strQuantityUnitId;
+
+    std::map<std::string, MaterialConsumption> mapMaterialConsumptions; // T_INPUT, T_SPINOFF, T_WASTE, T_LEFTOVER
 	std::map<std::string, int> mapMaterialCounts;
     std::map<std::string, MachineInfo> mapMachineInfos;
     std::set<std::string> vMachines;

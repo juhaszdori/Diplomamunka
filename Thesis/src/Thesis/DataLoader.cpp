@@ -2,7 +2,7 @@
 #include "CSVReader.h"
 #include "Parser.h"
 
-//templatekkel megoldani a függvényeket és a builddatastructure-t is, hogy ne legyen sok kódismétlés
+//templatekkel megoldani a fï¿½ggvï¿½nyeket ï¿½s a builddatastructure-t is, hogy ne legyen sok kï¿½dismï¿½tlï¿½s
 
 std::vector<ProductionEvent> DataLoader::LoadProductionEvents( const std::string& strFileName )
 {
@@ -29,6 +29,7 @@ std::unordered_map<std::string, Product> DataLoader::BuildDataStructure( const s
 	for( const ProductionEvent& sProductionEvent : vProductionEvents )
 	{
 		mapProducts[sProductionEvent.strProductId].mapTasks[sProductionEvent.strTaskId].mapOperations[sProductionEvent.strOperationId].vEvents.push_back( sProductionEvent );
+		mapProducts[sProductionEvent.strProductId].strProductId = sProductionEvent.strProductId;
 	}
 
 	for( const ProductionTimeData& sProductionTimeData : vProductionTimeData )
@@ -135,10 +136,10 @@ std::unordered_map<std::string, MaterialDemand> DataLoader::LoadMaterialDemands(
 
 std::unordered_map<std::string, Recipe> DataLoader::LoadRecipeDatabase( const std::string& folder )
 {
-	const std::string recipesFile         = folder + "/mf_march_recipes.csv";
-	const std::string recipeItemsFile     = folder + "/mf_march_recipeitems.csv";
-	const std::string machineDemandsFile  = folder + "/mf_march_machinedemands.csv";
-	const std::string materialDemandsFile = folder + "/mf_march_materialdemands.csv";
+	const std::string recipesFile         = folder + "/mf_recipes.csv";
+	const std::string recipeItemsFile     = folder + "/mf_recipeitems.csv";
+	const std::string machineDemandsFile  = folder + "/mf_machinedemands.csv";
+	const std::string materialDemandsFile = folder + "/mf_materialdemands.csv";
 
 	std::unordered_map<std::string, Recipe>         mapRecipes         = DataLoader::LoadRecipes(         recipesFile         );
 	std::unordered_map<std::string, RecipeItem>     mapRecipeItems     = DataLoader::LoadRecipeItems(     recipeItemsFile     );
