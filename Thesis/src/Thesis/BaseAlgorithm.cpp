@@ -79,6 +79,7 @@ std::vector<ProductionInterval> BaseAlgorithm::BuildProductionIntervals( const s
 	return mapOperationPredecessors;
 }*/
 
+
 int BaseAlgorithm::MostFrequentOrder( const std::vector<int>& vOrders )
 {
 	std::unordered_map<int, int> mapOrderCounts;
@@ -94,7 +95,7 @@ int BaseAlgorithm::MostFrequentOrder( const std::vector<int>& vOrders )
 
 	for( const auto& pair : mapOrderCounts )
 	{
-		if( pair.second > iMaxCount)
+		if( pair.second > iMaxCount )
 		{
 			iMaxCount = pair.second;
 			iMostFrequentOrder = pair.first;
@@ -103,6 +104,80 @@ int BaseAlgorithm::MostFrequentOrder( const std::vector<int>& vOrders )
 	return iMostFrequentOrder;
 }
 
+/*bool BaseAlgorithm::CompareSequences(std::vector<std::string> vVector1, std::vector<std::string> vVector2)
+{
+	if( vVector1.size() != vVector2.size() )
+	{
+		return false;
+	}
+
+	return std::equal( vVector1.begin(), vVector1.end(), vVector2.begin(), vVector2.end() )
+}*/
+
+std::vector<std::string> BaseAlgorithm::MostFrequentOperationSequenceForProduct( const std::vector<std::vector<std::string>>& vSequences )
+{
+	std::map<std::vector<std::string>, int> mapSequenceCounts;
+	
+	for( const auto& sequence : vSequences )
+	{
+		mapSequenceCounts[sequence]++;
+	}
+
+	const std::vector<std::string>* pMostFrequentSequence = nullptr;
+	int iMaxCount = 0;
+
+	for( const auto& pair : mapSequenceCounts )
+	{
+		if( pair.second > iMaxCount )
+		{
+			iMaxCount = pair.second;
+			pMostFrequentSequence = &pair.first;
+		}
+	}
+
+	return pMostFrequentSequence ? *pMostFrequentSequence : std::vector<std::string>();	
+}
+
+std::vector<std::vector<std::string>> BaseAlgorithm::BuildOperationSequencesForProduct( const Product& sProduct, std::map<std::tuple<std::string, std::string>, Job>& mapJobs )
+{
+	std::vector<std::vector<std::string>> vOperationSequences;
+
+	for( const auto& taskPair : sProduct.mapTasks )
+	{
+		const std::string& strTaskId = taskPair.first;
+		const Task& sTask = taskPair.second;
+
+		std::vector<Job*> vOperationsOrderedByTimestamp;
+
+		for( const auto& operationPair : sTask.mapOperations )
+		{
+			const std::string& strOperationId = operationPair.first;
+			const Operation& sOperation = operationPair.second;
+
+			std::tuple<std::string, std::string> key = std::make_tuple( strTaskId, strOperationId );
+			Job& sJob = mapJobs[key];
+
+			vOperationsOrderedByTimestamp.push_back( &sJob );
+		}
+
+		std::sort( vOperationsOrderedByTimestamp.begin(), vOperationsOrderedByTimestamp.end(),
+		[]( const Job* j1, const Job* j2 )
+		{ 
+			return j1->tEnd < j2->tEnd; 
+		} );
+
+		std::vector<std::string> vOperationSequence;
+
+		for( size_t i = 0; i < vOperationsOrderedByTimestamp.size(); ++i )
+		{
+			vOperationSequence.push_back( vOperationsOrderedByTimestamp[i]->strOperationId );
+		}
+
+		vOperationSequences.push_back( vOperationSequence );
+	}
+
+	return vOperationSequences;
+}
 
 std::map<std::tuple<std::string, std::string>, Job> BaseAlgorithm::BuildJobs( const Product& sProduct )
 {
@@ -116,7 +191,8 @@ std::map<std::tuple<std::string, std::string>, Job> BaseAlgorithm::BuildJobs( co
 
 		//std::cout << "Task: " << strTaskId << std::endl;
 
-		std::vector<Job*> vOperationsOrderedByTimestamp;
+		//std::vector<Job*> vOperationsOrderedByTimestamp;
+		//std::vector<std::string> vOperationSequence;
 
 		// aztán az összes mûveleten
 		for( const auto& operation : sTask.mapOperations )
@@ -167,27 +243,30 @@ std::map<std::tuple<std::string, std::string>, Job> BaseAlgorithm::BuildJobs( co
 				sJob.vUsedMachines.insert( event.strMachineId );
 			}
 
-			vOperationsOrderedByTimestamp.push_back( &sJob );
+			//vOperationsOrderedByTimestamp.push_back( &sJob );
 
 			sJob.vProductionIntervals = BuildProductionIntervals( sOperation.vEvents, sOperation.vProductionTimes );
 			// ez most tartalmazza a terméknek a gyártási intervallumait, a mennyiségekkel együtt gépek szerint, de a gépekhez tartozó mûveleti idõt még nem számolja ki
 		}
 
-		std::sort( vOperationsOrderedByTimestamp.begin(), vOperationsOrderedByTimestamp.end(),
+		/* std::sort( vOperationsOrderedByTimestamp.begin(), vOperationsOrderedByTimestamp.end(),
 			[]( const Job* j1, const Job* j2 )
 			{ 
 				return j1->tEnd < j2->tEnd; 
 			} );
 
-		/*if (a->tEnd != b->tEnd)
+		if (a->tEnd != b->tEnd)
 			return a->tEnd < b->tEnd;
 
-		return a->strOperationId < b->strOperationId;*/
+		return a->strOperationId < b->strOperationId;
 
 		for( size_t i = 0; i < vOperationsOrderedByTimestamp.size(); ++i )
 		{
 			vOperationsOrderedByTimestamp[i]->iOrder = static_cast<int>(i + 1);
+			vOperationSequence.push_back( vOperationsOrderedByTimestamp[i]->strOperationId );
 		}
+
+		vOperationSequences.push_back( vOperationSequence );*/
 	}
 
 	return mapJobs;
@@ -263,7 +342,7 @@ std::map<std::string, AggregatedOperationData> BaseAlgorithm::AggregateOperation
 	return mapOperations;
 }
 
-Recipe BaseAlgorithm::BuildRecipe( const Product& sProduct, const std::map<std::string, AggregatedOperationData>& mapOperations )
+Recipe BaseAlgorithm::BuildRecipe( const Product& sProduct, const std::map<std::string, AggregatedOperationData>& mapOperations, std::vector<std::string>& vMostFrequentOperationSequence )
 {
 	Recipe sRecipe;
 	sRecipe.bDefault = true;
@@ -303,12 +382,23 @@ Recipe BaseAlgorithm::BuildRecipe( const Product& sProduct, const std::map<std::
 		RecipeItem sRecipeItem;
 		sRecipeItem.strRecipeId = sRecipe.strId;
 		sRecipeItem.strId = "RI_" + sProduct.strProductId + "_" + sAggregatedOperation.strOperationId;
-		sRecipeItem.iOrder = MostFrequentOrder( sAggregatedOperation.vOperationOrders );
+		//sRecipeItem.iOrder = MostFrequentOrder( sAggregatedOperation.vOperationOrders );
 		sRecipeItem.strOperationId = sAggregatedOperation.strOperationId;
 		sRecipeItem.dBaseQuantity = 1.0;
 		sRecipeItem.eOperationTimeUnit = UN_SECOND;
 		sRecipeItem.eProductionMode = PM_OWN_PRODCUTION;
 		sRecipeItem.strBaseQuantityUnitId = sAggregatedOperation.strQuantityUnitId;
+
+
+		for( int i = 0; i < vMostFrequentOperationSequence.size(); i++ )
+		{
+			if( vMostFrequentOperationSequence[i] == sAggregatedOperation.strOperationId )
+			{
+				sRecipeItem.iOrder = i + 1;
+				break;
+			}
+		}
+
 
 		if( dAveragePieceGood > 0 )
 			sRecipeItem.dRunningScrap = dAveragePieceScrap / dAveragePieceGood; // megnézni hogy arány vagy szám és mire használja a dSuite
@@ -380,9 +470,9 @@ Recipe BaseAlgorithm::BuildRecipe( const Product& sProduct, const std::map<std::
 	std::sort(
 		sRecipe.vRecipeItems.begin(),
 		sRecipe.vRecipeItems.end(),
-		[](const RecipeItem& a, const RecipeItem& b)
+		[]( const RecipeItem& a, const RecipeItem& b )
 		{
-			if (a.iOrder != b.iOrder)
+			if( a.iOrder != b.iOrder )
 				return a.iOrder < b.iOrder;
 
 			// Holtverseny esetén determinisztikus sorrend
@@ -395,8 +485,9 @@ Recipe BaseAlgorithm::BuildRecipe( const Product& sProduct, const std::map<std::
 Recipe BaseAlgorithm::GenerateRecipeForProduct( const Product& sProduct )
 {
 	std::map<std::tuple<std::string, std::string>, Job> mapJobs = BuildJobs( sProduct );
+	std::vector<std::string> vMostFrequentOperationSequence = MostFrequentOperationSequenceForProduct( BuildOperationSequencesForProduct( sProduct, mapJobs ) );
 	std::map<std::string, AggregatedOperationData> mapOperations = AggregateOperations( mapJobs );
-	Recipe sRecipe = BuildRecipe( sProduct, mapOperations );
+	Recipe sRecipe = BuildRecipe( sProduct, mapOperations, vMostFrequentOperationSequence );
 
 	return sRecipe;
 }
