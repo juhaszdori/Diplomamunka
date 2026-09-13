@@ -6,6 +6,7 @@
 #include "Model.h"
 #include "DataLoader.h"
 #include "BaseAlgorithm.h"
+#include "LiteratureAlgorithm.h"
 #include "Evaluation.h"
 #include "RecipeExport.h"
 
@@ -58,11 +59,13 @@ void PrintTimes( const std::vector<ProductionTimeData>& vProductionTimes )
 
 int main( int argc, char* argv[] )
 {
-	std::vector<ProductionEvent>    vProductionEvents = DataLoader::LoadProductionEvents(   "../../data/input/mf_events.csv" );
-	std::vector<ProductionTimeData> vProductionTimes  = DataLoader::LoadProductionTimeData( "../../data/input/mf_times.csv" );
+	std::vector<ProductionEvent>    vProductionEvents = DataLoader::LoadProductionEvents(   "../../data/input/gy_events.csv" );
+	std::vector<ProductionTimeData> vProductionTimes  = DataLoader::LoadProductionTimeData( "../../data/input/gy_times.csv" );
 
 	//PrintEvents( vProductionEvents );
 	//PrintTimes( vProductionTimes );
+
+	PreProcessEventLogs(  )
 
 	std::unordered_map<std::string, Product> mapProducts = DataLoader::BuildDataStructure( vProductionEvents, vProductionTimes );
 
@@ -75,17 +78,24 @@ int main( int argc, char* argv[] )
 		const Product& sProduct = pair.second;
 
 		Recipe sRecipe = BaseAlgorithm::GenerateRecipeForProduct( sProduct );
+		//Recipe sRecipe = LiteratureAlgorithm::GenerateRecipeForProduct( sProduct );
 		mapRecipes[sRecipe.strProductId] = sRecipe;
 
 		std::cout << "Generated recipe for product: " << sProduct.strProductId << std::endl;
-
 	}
 
+	//RecipeExport exporter;
+	//exporter.WriteRecipes(         "../../data/output/mf_recipes.csv"        , mapRecipes );
+	//exporter.WriteRecipeItems(     "../../data/output/mf_recipeitems.csv"    , mapRecipes );
+	//exporter.WriteMachineDemands(  "../../data/output/mf_machinedemands.csv" , mapRecipes );
+	//exporter.WriteMaterialDemands( "../../data/output/mf_materialdemands.csv", mapRecipes );
+
+
 	RecipeExport exporter;
-	exporter.WriteRecipes(         "../../data/output/mf_recipes.csv"        , mapRecipes );
-	exporter.WriteRecipeItems(     "../../data/output/mf_recipeitems.csv"    , mapRecipes );
-	exporter.WriteMachineDemands(  "../../data/output/mf_machinedemands.csv" , mapRecipes );
-	exporter.WriteMaterialDemands( "../../data/output/mf_materialdemands.csv", mapRecipes );
+	exporter.WriteRecipes(         "../../data/output/gy_recipes.csv"        , mapRecipes );
+	exporter.WriteRecipeItems(     "../../data/output/gy_recipeitems.csv"    , mapRecipes );
+	exporter.WriteMachineDemands(  "../../data/output/gy_machinedemands.csv" , mapRecipes );
+	exporter.WriteMaterialDemands( "../../data/output/gy_materialdemands.csv", mapRecipes );
 
 	std::unordered_map < std::string, Recipe> mapReferenceRecipes = DataLoader::LoadRecipeDatabase( "../../data/reference" );
 	Evaluation::CompareRecipes(mapRecipes, mapReferenceRecipes);

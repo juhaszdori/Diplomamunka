@@ -1,7 +1,7 @@
 -- gyártási események: 
  
   SELECT
-         tasktab.id_material                                 AS product,
+         productionreporttab.id_material                     AS product,
 		     tasktab.id_db                                       AS task,
          --jobtab.id_db                                        AS job,
          productionrecipeitemtab.id_operation                AS "operation",
@@ -20,15 +20,15 @@
      AND productionreporttab.d_dbend          = 99991231235959
 	   AND productionreporttab.b_dbdeleted      = false
      AND productionreporttab.e_receipttype    = 0
-     AND productionreporttab.d_creationdate   > 20260301000000
+     --AND productionreporttab.d_creationdate   > 20260301000000
      AND productionreporttab.e_reportingtype IN (0,1)
      --AND productionreporttab.b_manuallycreated = false
     JOIN 
          jobtab
       ON jobtab.id_db       = productionreporttab.id_job
-     AND jobtab.e_status   >= 5
      AND jobtab.d_dbend     = 99991231235959
      AND jobtab.b_dbdeleted = false
+     AND jobtab.d_realbeg   > 20260301000000
     JOIN 
          tasktab 
       ON tasktab.id_db         = jobtab.id_task
@@ -51,13 +51,20 @@
          productionreportitemtab.d_dbend      = 99991231235959
      AND productionreportitemtab.b_dbdeleted  = false
      AND productionreportitemtab.e_type      IN (0,1,4)
+     
+     AND NOT EXISTS ( SELECT 1
+                   FROM jobtab j2
+                  WHERE j2.id_task     = jobtab.id_task
+                    AND j2.d_dbend     = 99991231235959
+                    AND j2.b_dbdeleted = false
+                    AND j2.e_status    < 5 )
 ORDER BY 
          product, task, productionrecipeitemtab.id_operation, productionreporttab.d_creationdate;
          
 -- idők:
 
   SELECT 
-         tasktab.id_material                  AS product,
+         productionreporttab.id_material      AS product,
          tasktab.id_db                        AS task,                  
          productionrecipeitemtab.id_operation AS "operation",                                 
          jobstatusrecordtab.id_machine        AS machine,                     
@@ -70,7 +77,6 @@ ORDER BY
       ON jobtab.id_db                        = jobstatusrecordtab.id_job
      AND jobtab.d_dbend                      = 99991231235959
      AND jobtab.b_dbdeleted                  = false
-	   AND jobtab.e_status                    >= 5
 	   AND jobtab.d_realbeg                    > 20260301000000
 	JOIN 
          tasktab 
@@ -87,6 +93,13 @@ ORDER BY
          jobstatusrecordtab.b_dbdeleted      = false 
      AND jobstatusrecordtab.d_dbend          = 99991231235959 
      AND jobstatusrecordtab.e_status         = 2 
+     
+     AND NOT EXISTS ( SELECT 1
+                   FROM jobtab j2
+                  WHERE j2.id_task     = jobtab.id_task
+                    AND j2.d_dbend     = 99991231235959
+                    AND j2.b_dbdeleted = false
+                    AND j2.e_status    < 5 )              
 ORDER BY 
          tasktab.id_db,
          productionrecipeitemtab.id_operation,

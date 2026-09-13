@@ -40,6 +40,23 @@ std::unordered_map<std::string, Product> DataLoader::BuildDataStructure( const s
 	return mapProducts;
 }
 
+std::unordered_map<std::string, Product> DataLoader::BuildDataStructure2( const std::vector<ProductionEvent>& vProductionEvents )
+	std::unordered_map<std::string, Product> mapProducts;
+
+	for( const ProductionEvent& sProductionEvent : vProductionEvents )
+	{
+		mapProducts[sProductionEvent.strProductId].mapTasks[sProductionEvent.strTaskId].mapOperations[sProductionEvent.strOperationId].vEvents.push_back( sProductionEvent );
+		mapProducts[sProductionEvent.strProductId].strProductId = sProductionEvent.strProductId;
+	}
+
+	for( const ProductionTimeData& sProductionTimeData : vProductionTimeData )
+	{
+		mapProducts[sProductionTimeData.strProductId].mapTasks[sProductionTimeData.strTaskId].mapOperations[sProductionTimeData.strOperationId].vProductionTimes.push_back( sProductionTimeData );
+	}
+
+	return mapProducts;
+}
+
 
 std::vector<ProductionTimeData> DataLoader::LoadProductionTimeData( const std::string& strFileName )
 {
@@ -136,10 +153,10 @@ std::unordered_map<std::string, MaterialDemand> DataLoader::LoadMaterialDemands(
 
 std::unordered_map<std::string, Recipe> DataLoader::LoadRecipeDatabase( const std::string& folder )
 {
-	const std::string recipesFile         = folder + "/mf_recipes.csv";
-	const std::string recipeItemsFile     = folder + "/mf_recipeitems.csv";
-	const std::string machineDemandsFile  = folder + "/mf_machinedemands.csv";
-	const std::string materialDemandsFile = folder + "/mf_materialdemands.csv";
+	const std::string recipesFile         = folder + "/gy_recipes.csv";
+	const std::string recipeItemsFile     = folder + "/gy_recipeitems.csv";
+	const std::string machineDemandsFile  = folder + "/gy_machinedemands.csv";
+	const std::string materialDemandsFile = folder + "/gy_materialdemands.csv";
 
 	std::unordered_map<std::string, Recipe>         mapRecipes         = DataLoader::LoadRecipes(         recipesFile         );
 	std::unordered_map<std::string, RecipeItem>     mapRecipeItems     = DataLoader::LoadRecipeItems(     recipeItemsFile     );

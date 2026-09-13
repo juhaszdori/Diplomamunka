@@ -93,13 +93,15 @@ struct ProductionInterval
 
 	double dProducedQuantity = 0;
 	double dScrapQuantity = 0;
-	std::string strQuantitiyUnitId;
+	std::string strQuantityUnitId;
 };
 
 struct MaterialConsumption
 {
 	double dUsedQuantity = 0.0;
 	std::string strQuantityUnitId;
+	std::vector<double> vRatios;
+	int iOccurrence = 0;
 };
 
 
@@ -146,6 +148,7 @@ struct Product
 {
 	std::string strProductId;
 	std::map<std::string, Task> mapTasks;
+	std::vector<std::string> vOperationSequence;
 };
 
 struct MaterialDemand

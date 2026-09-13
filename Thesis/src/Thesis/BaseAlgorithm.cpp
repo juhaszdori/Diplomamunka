@@ -40,7 +40,7 @@ std::vector<ProductionInterval> BaseAlgorithm::BuildProductionIntervals( const s
 			if( event.strMachineId != sInterval.strMachineId )
 				continue;
 
-			if( event.tTimeStamp >= sInterval.tTimeBeg && event.tTimeStamp <= sInterval.tTimeEnd )
+			if( event.tTimeStamp > sInterval.tTimeBeg && event.tTimeStamp <= sInterval.tTimeEnd )
 			{
 				if( event.eEventType == T_PRODUCT && event.strProductId == event.strMaterialId )
 					sInterval.dProducedQuantity += event.dQuantity;
@@ -48,8 +48,8 @@ std::vector<ProductionInterval> BaseAlgorithm::BuildProductionIntervals( const s
 				else if( event.eEventType == T_SCRAP )
 					sInterval.dScrapQuantity += event.dQuantity;
 
-				if( sInterval.strQuantitiyUnitId.empty() )
-				sInterval.strQuantitiyUnitId = event.strQuantityUnitId;
+				if( sInterval.strQuantityUnitId.empty() )
+				sInterval.strQuantityUnitId = event.strQuantityUnitId;
 			}
 		}
 		vecProductionIntervals.push_back( sInterval );
@@ -58,29 +58,7 @@ std::vector<ProductionInterval> BaseAlgorithm::BuildProductionIntervals( const s
 	return vecProductionIntervals;
 }
 
-/*std::map<std::string, Operation> InferOperationOrder(const Product& sProduct)
-{
-	std::map<std::string, std::set<std::string>> mapOperationPredecessors;
-	for( const auto& taskPair : sProduct.mapTasks )
-	{
-		const Task& sTask = taskPair.second;
-		for( const auto& operationPair : sTask.mapOperations )
-		{
-			const Operation& sOperation = operationPair.second;
-			for( const auto& event : sOperation.vEvents )
-			{
-				if( event.eEventType == T_PRODUCT && event.strProductId == event.strMaterialId )
-				{
-					mapOperationPredecessors[event.strOperationId].insert( event.strOperationId );
-				}
-			}
-		}
-	}
-	return mapOperationPredecessors;
-}*/
-
-
-int BaseAlgorithm::MostFrequentOrder( const std::vector<int>& vOrders )
+/*int BaseAlgorithm::MostFrequentOrder(const std::vector<int>& vOrders)
 {
 	std::unordered_map<int, int> mapOrderCounts;
 
@@ -102,16 +80,6 @@ int BaseAlgorithm::MostFrequentOrder( const std::vector<int>& vOrders )
 		}
 	}
 	return iMostFrequentOrder;
-}
-
-/*bool BaseAlgorithm::CompareSequences(std::vector<std::string> vVector1, std::vector<std::string> vVector2)
-{
-	if( vVector1.size() != vVector2.size() )
-	{
-		return false;
-	}
-
-	return std::equal( vVector1.begin(), vVector1.end(), vVector2.begin(), vVector2.end() )
 }*/
 
 std::vector<std::string> BaseAlgorithm::MostFrequentOperationSequenceForProduct( const std::vector<std::vector<std::string>>& vSequences )
@@ -163,7 +131,7 @@ std::vector<std::vector<std::string>> BaseAlgorithm::BuildOperationSequencesForP
 		std::sort( vOperationsOrderedByTimestamp.begin(), vOperationsOrderedByTimestamp.end(),
 		[]( const Job* j1, const Job* j2 )
 		{ 
-			return j1->tEnd < j2->tEnd; 
+			return j1->tEnd < j2->tEnd;
 		} );
 
 		std::vector<std::string> vOperationSequence;
@@ -214,7 +182,7 @@ std::map<std::tuple<std::string, std::string>, Job> BaseAlgorithm::BuildJobs( co
 			{
 				//std::cout << "ProductionReportItem: " << event.strMaterialId << " " << event.dQuantity << std::endl << std::endl;
 
-				if( event.eEventType == T_PRODUCT  && event.strProductId == event.strMaterialId ) // ha nem egyezik akkor az köztes mûvelet
+				if( event.eEventType == T_PRODUCT  && event.strProductId == event.strMaterialId ) // a termelési jelentés cikk mezõjében van a gyártott termék
 				{
 					sJob.dPieceGood += event.dQuantity;
 					sJob.tEnd = std::max( sJob.tEnd, event.tTimeStamp );
@@ -236,7 +204,7 @@ std::map<std::tuple<std::string, std::string>, Job> BaseAlgorithm::BuildJobs( co
 
 				else if( event.eEventType == T_INPUT && event.strProductId != event.strMaterialId )
 				{
-					sJob.mapMaterialConsumptions[event.strMaterialId].dUsedQuantity += std::abs( event.dQuantity );
+					sJob.mapMaterialConsumptions[event.strMaterialId].dUsedQuantity += std::abs( event.dQuantity ); //
 					sJob.mapMaterialConsumptions[event.strMaterialId].strQuantityUnitId = event.strQuantityUnitId;
 				}
 
@@ -272,7 +240,7 @@ std::map<std::tuple<std::string, std::string>, Job> BaseAlgorithm::BuildJobs( co
 	return mapJobs;
 }
 
-
+// összegzi a termék mûveleteinek paramétereit
 std::map<std::string, AggregatedOperationData> BaseAlgorithm::AggregateOperations( const std::map<std::tuple<std::string, std::string>, Job>& mapJobs )
 {
 	std::map<std::string, AggregatedOperationData> mapOperations;
@@ -305,7 +273,7 @@ std::map<std::string, AggregatedOperationData> BaseAlgorithm::AggregateOperation
 
 		AggregatedOperationData& sAggregatedOperation = mapOperations[sJob.strOperationId];
 
-		sAggregatedOperation.vOperationOrders.push_back( sJob.iOrder );
+		//sAggregatedOperation.vOperationOrders.push_back( sJob.iOrder );
 
 		sAggregatedOperation.strOperationId = sJob.strOperationId;
 		sAggregatedOperation.iJobCount++;
@@ -315,6 +283,7 @@ std::map<std::string, AggregatedOperationData> BaseAlgorithm::AggregateOperation
 
 		sAggregatedOperation.strQuantityUnitId = sJob.strQuantityUnitId;
 
+		// ez redundáns
 		sAggregatedOperation.vMachines.insert( sJob.vUsedMachines.begin(), sJob.vUsedMachines.end() );
 
 		for( const auto& interval : sJob.vProductionIntervals )
@@ -324,8 +293,8 @@ std::map<std::string, AggregatedOperationData> BaseAlgorithm::AggregateOperation
 			sMachineInfo.dTotalOperationTime += interval.dOperationTime;
 			sMachineInfo.dProducedQuantity += interval.dProducedQuantity;
 			sMachineInfo.dScrapQuantity += interval.dScrapQuantity;
-			sMachineInfo.strQuantityUnitId = interval.strQuantitiyUnitId;
-			sMachineInfo.iIntervalCount++;
+			sMachineInfo.strQuantityUnitId = interval.strQuantityUnitId;
+			//sMachineInfo.iIntervalCount++;
 		}
 
 		for( const auto& materialPair : sJob.mapMaterialConsumptions )
@@ -335,6 +304,14 @@ std::map<std::string, AggregatedOperationData> BaseAlgorithm::AggregateOperation
 
 			sAggregatedOperation.mapMaterialConsumptions[strMaterialId].dUsedQuantity += sMaterialConsumption.dUsedQuantity;
 			sAggregatedOperation.mapMaterialConsumptions[strMaterialId].strQuantityUnitId = sMaterialConsumption.strQuantityUnitId;
+
+			// ezt át lehetne rakni a vuildjobba és a jobnak átadni attribútumként
+			double dProducedQuantity = sJob.dPieceGood + sJob.dPieceScrap;
+			double dMaterialRatio = sMaterialConsumption.dUsedQuantity / dProducedQuantity;
+
+			sAggregatedOperation.mapMaterialConsumptions[strMaterialId].vRatios.push_back( dMaterialRatio );
+			sAggregatedOperation.mapMaterialConsumptions[strMaterialId].iOccurrence += 1;
+
 			sAggregatedOperation.mapMaterialCounts[strMaterialId]++;
 		}
 	}
@@ -389,7 +366,6 @@ Recipe BaseAlgorithm::BuildRecipe( const Product& sProduct, const std::map<std::
 		sRecipeItem.eProductionMode = PM_OWN_PRODCUTION;
 		sRecipeItem.strBaseQuantityUnitId = sAggregatedOperation.strQuantityUnitId;
 
-
 		for( int i = 0; i < vMostFrequentOperationSequence.size(); i++ )
 		{
 			if( vMostFrequentOperationSequence[i] == sAggregatedOperation.strOperationId )
@@ -398,7 +374,6 @@ Recipe BaseAlgorithm::BuildRecipe( const Product& sProduct, const std::map<std::
 				break;
 			}
 		}
-
 
 		if( dAveragePieceGood > 0 )
 			sRecipeItem.dRunningScrap = dAveragePieceScrap / dAveragePieceGood; // megnézni hogy arány vagy szám és mire használja a dSuite
@@ -431,6 +406,9 @@ Recipe BaseAlgorithm::BuildRecipe( const Product& sProduct, const std::map<std::
 
 			if( dAveragePieceGood > 0 )
 				sMaterialDemand.dPiece = dAverageUsedQuantity / dAveragePieceGood;
+
+			// itt kellene a medián, átlag, szórás
+			// CalculateMaterialConsumptionStatisztics()
 			sRecipeItem.vMaterialDemands.push_back( sMaterialDemand );
 		}
 
@@ -485,6 +463,7 @@ Recipe BaseAlgorithm::BuildRecipe( const Product& sProduct, const std::map<std::
 Recipe BaseAlgorithm::GenerateRecipeForProduct( const Product& sProduct )
 {
 	std::map<std::tuple<std::string, std::string>, Job> mapJobs = BuildJobs( sProduct );
+	// ezt át lehetne rakni a DFG-vel egy szintre
 	std::vector<std::string> vMostFrequentOperationSequence = MostFrequentOperationSequenceForProduct( BuildOperationSequencesForProduct( sProduct, mapJobs ) );
 	std::map<std::string, AggregatedOperationData> mapOperations = AggregateOperations( mapJobs );
 	Recipe sRecipe = BuildRecipe( sProduct, mapOperations, vMostFrequentOperationSequence );

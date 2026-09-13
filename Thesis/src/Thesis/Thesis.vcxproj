@@ -131,6 +131,7 @@
     <ClCompile Include="BaseAlgorithm.cpp" />
     <ClCompile Include="CSVReader.cpp" />
     <ClCompile Include="DataLoader.cpp" />
+    <ClCompile Include="LiteratureAlgorithm.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Evaluation.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -141,6 +142,7 @@
     <ClInclude Include="BaseAlgorithm.h" />
     <ClInclude Include="CSVReader.h" />
     <ClInclude Include="DataLoader.h" />
+    <ClInclude Include="LiteratureAlgorithm.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Evaluation.h" />
     <ClInclude Include="Parser.h" />

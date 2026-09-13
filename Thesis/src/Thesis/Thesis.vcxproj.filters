@@ -39,6 +39,9 @@
     <ClCompile Include="BaseAlgorithm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LiteratureAlgorithm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Evaluation.h">
@@ -60,6 +63,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BaseAlgorithm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LiteratureAlgorithm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
