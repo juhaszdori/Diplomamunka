@@ -65,8 +65,6 @@ int main( int argc, char* argv[] )
 	//PrintEvents( vProductionEvents );
 	//PrintTimes( vProductionTimes );
 
-	PreProcessEventLogs(  )
-
 	std::unordered_map<std::string, Product> mapProducts = DataLoader::BuildDataStructure( vProductionEvents, vProductionTimes );
 
 	//egyb�l hasonl�tsuk �ssze a recepteket amikor l�trehoztuk vagy egyben az �sszeset egy f�ggv�nyben

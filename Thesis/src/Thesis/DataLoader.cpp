@@ -40,7 +40,7 @@ std::unordered_map<std::string, Product> DataLoader::BuildDataStructure( const s
 	return mapProducts;
 }
 
-std::unordered_map<std::string, Product> DataLoader::BuildDataStructure2( const std::vector<ProductionEvent>& vProductionEvents )
+/*std::unordered_map<std::string, Product> DataLoader::BuildDataStructure2(const std::vector<ProductionEvent>& vProductionEvents)
 	std::unordered_map<std::string, Product> mapProducts;
 
 	for( const ProductionEvent& sProductionEvent : vProductionEvents )
@@ -55,7 +55,7 @@ std::unordered_map<std::string, Product> DataLoader::BuildDataStructure2( const 
 	}
 
 	return mapProducts;
-}
+}*/
 
 
 std::vector<ProductionTimeData> DataLoader::LoadProductionTimeData( const std::string& strFileName )

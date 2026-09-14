@@ -58,30 +58,6 @@ std::vector<ProductionInterval> BaseAlgorithm::BuildProductionIntervals( const s
 	return vecProductionIntervals;
 }
 
-/*int BaseAlgorithm::MostFrequentOrder(const std::vector<int>& vOrders)
-{
-	std::unordered_map<int, int> mapOrderCounts;
-
-	// megszámoljuk hogy egy "sorrend" hányszor szerepel
-	for( int iOrder : vOrders )
-	{
-		mapOrderCounts[iOrder]++;
-	}
-
-	int iMostFrequentOrder = -1;
-	int iMaxCount = 0;
-
-	for( const auto& pair : mapOrderCounts )
-	{
-		if( pair.second > iMaxCount )
-		{
-			iMaxCount = pair.second;
-			iMostFrequentOrder = pair.first;
-		}
-	}
-	return iMostFrequentOrder;
-}*/
-
 std::vector<std::string> BaseAlgorithm::MostFrequentOperationSequenceForProduct( const std::vector<std::vector<std::string>>& vSequences )
 {
 	std::map<std::vector<std::string>, int> mapSequenceCounts;
@@ -159,9 +135,6 @@ std::map<std::tuple<std::string, std::string>, Job> BaseAlgorithm::BuildJobs( co
 
 		//std::cout << "Task: " << strTaskId << std::endl;
 
-		//std::vector<Job*> vOperationsOrderedByTimestamp;
-		//std::vector<std::string> vOperationSequence;
-
 		// aztán az összes mûveleten
 		for( const auto& operation : sTask.mapOperations )
 		{
@@ -190,7 +163,7 @@ std::map<std::tuple<std::string, std::string>, Job> BaseAlgorithm::BuildJobs( co
 					if( sJob.strQuantityUnitId.empty() )
 						sJob.strQuantityUnitId = event.strQuantityUnitId;
 					//else
-						//convert
+						//kell átváltani?
 				}
 
 				else if( event.eEventType == T_SCRAP )
@@ -211,30 +184,9 @@ std::map<std::tuple<std::string, std::string>, Job> BaseAlgorithm::BuildJobs( co
 				sJob.vUsedMachines.insert( event.strMachineId );
 			}
 
-			//vOperationsOrderedByTimestamp.push_back( &sJob );
-
 			sJob.vProductionIntervals = BuildProductionIntervals( sOperation.vEvents, sOperation.vProductionTimes );
 			// ez most tartalmazza a terméknek a gyártási intervallumait, a mennyiségekkel együtt gépek szerint, de a gépekhez tartozó mûveleti idõt még nem számolja ki
 		}
-
-		/* std::sort( vOperationsOrderedByTimestamp.begin(), vOperationsOrderedByTimestamp.end(),
-			[]( const Job* j1, const Job* j2 )
-			{ 
-				return j1->tEnd < j2->tEnd; 
-			} );
-
-		if (a->tEnd != b->tEnd)
-			return a->tEnd < b->tEnd;
-
-		return a->strOperationId < b->strOperationId;
-
-		for( size_t i = 0; i < vOperationsOrderedByTimestamp.size(); ++i )
-		{
-			vOperationsOrderedByTimestamp[i]->iOrder = static_cast<int>(i + 1);
-			vOperationSequence.push_back( vOperationsOrderedByTimestamp[i]->strOperationId );
-		}
-
-		vOperationSequences.push_back( vOperationSequence );*/
 	}
 
 	return mapJobs;
@@ -273,8 +225,6 @@ std::map<std::string, AggregatedOperationData> BaseAlgorithm::AggregateOperation
 
 		AggregatedOperationData& sAggregatedOperation = mapOperations[sJob.strOperationId];
 
-		//sAggregatedOperation.vOperationOrders.push_back( sJob.iOrder );
-
 		sAggregatedOperation.strOperationId = sJob.strOperationId;
 		sAggregatedOperation.iJobCount++;
 
@@ -305,7 +255,7 @@ std::map<std::string, AggregatedOperationData> BaseAlgorithm::AggregateOperation
 			sAggregatedOperation.mapMaterialConsumptions[strMaterialId].dUsedQuantity += sMaterialConsumption.dUsedQuantity;
 			sAggregatedOperation.mapMaterialConsumptions[strMaterialId].strQuantityUnitId = sMaterialConsumption.strQuantityUnitId;
 
-			// ezt át lehetne rakni a vuildjobba és a jobnak átadni attribútumként
+			// ezt át lehetne rakni a buildjobba és a jobnak átadni attribútumként
 			double dProducedQuantity = sJob.dPieceGood + sJob.dPieceScrap;
 			double dMaterialRatio = sMaterialConsumption.dUsedQuantity / dProducedQuantity;
 
@@ -325,6 +275,7 @@ Recipe BaseAlgorithm::BuildRecipe( const Product& sProduct, const std::map<std::
 	sRecipe.bDefault = true;
 	sRecipe.strProductId = sProduct.strProductId;
 	sRecipe.strId = "R_" + sProduct.strProductId;
+	sRecipe.iSampleSize = sProduct.mapTasks.size();
 
 	//AddRecipeItems( sRecipe, mapOperations );
 	for( const auto& operationPair : mapOperations )
@@ -337,8 +288,10 @@ Recipe BaseAlgorithm::BuildRecipe( const Product& sProduct, const std::map<std::
 			continue;
 		}
 
-		double dAveragePieceGood = sAggregatedOperation.dProducedQuantity / sAggregatedOperation.iJobCount;
-		double dAveragePieceScrap = sAggregatedOperation.dScrapQuantity / sAggregatedOperation.iJobCount;
+		double dTotalProducedQuantity = sAggregatedOperation.dProducedQuantity + sAggregatedOperation.dScrapQuantity;
+
+		//double dAveragePieceGood = sAggregatedOperation.dProducedQuantity / sAggregatedOperation.iJobCount;
+		//double dAveragePieceScrap = sAggregatedOperation.dScrapQuantity / sAggregatedOperation.iJobCount;
 		/*std::cout << "Aggregated Operation: " << sAggregatedOperation.strOperationId << std::endl;
 		std::cout << "Produced Quantity: " << sAggregatedOperation.dProducedQuantity << std::endl;
 		std::cout << "Scrap Quantity: " << sAggregatedOperation.dScrapQuantity << std::endl;
@@ -359,7 +312,6 @@ Recipe BaseAlgorithm::BuildRecipe( const Product& sProduct, const std::map<std::
 		RecipeItem sRecipeItem;
 		sRecipeItem.strRecipeId = sRecipe.strId;
 		sRecipeItem.strId = "RI_" + sProduct.strProductId + "_" + sAggregatedOperation.strOperationId;
-		//sRecipeItem.iOrder = MostFrequentOrder( sAggregatedOperation.vOperationOrders );
 		sRecipeItem.strOperationId = sAggregatedOperation.strOperationId;
 		sRecipeItem.dBaseQuantity = 1.0;
 		sRecipeItem.eOperationTimeUnit = UN_SECOND;
@@ -375,10 +327,10 @@ Recipe BaseAlgorithm::BuildRecipe( const Product& sProduct, const std::map<std::
 			}
 		}
 
-		if( dAveragePieceGood > 0 )
-			sRecipeItem.dRunningScrap = dAveragePieceScrap / dAveragePieceGood; // megnézni hogy arány vagy szám és mire használja a dSuite
-		else
-			sRecipeItem.dRunningScrap = 0.0;
+		//if( dAveragePieceGood > 0 )
+		//	sRecipeItem.dRunningScrap = dAveragePieceScrap / dAveragePieceGood; // megnézni hogy arány vagy szám és mire használja a dSuite
+		//else
+		//	sRecipeItem.dRunningScrap = 0.0;
 
 		// AddMaterialDemands( sRecipeItem, sAggregatedOperation, sProduct );
 		for( const auto& materialConsumptionPair : sAggregatedOperation.mapMaterialConsumptions )
@@ -388,7 +340,7 @@ Recipe BaseAlgorithm::BuildRecipe( const Product& sProduct, const std::map<std::
 
 			int iNumMaterialOccurrences = sAggregatedOperation.mapMaterialCounts.at(strMaterialId);
 
-			double dAverageUsedQuantity = sMaterialConsumption.dUsedQuantity / iNumMaterialOccurrences;
+			//double dAverageUsedQuantity = sMaterialConsumption.dUsedQuantity / iNumMaterialOccurrences;
 			
 			MaterialDemand sMaterialDemand;
 			sMaterialDemand.strRecipeItemId = sRecipeItem.strId;
@@ -398,17 +350,20 @@ Recipe BaseAlgorithm::BuildRecipe( const Product& sProduct, const std::map<std::
 			sMaterialDemand.dBaseQuantity = 1.0;
 			sMaterialDemand.strBaseQuantityUnitId = sMaterialConsumption.strQuantityUnitId;
 
-			//még átgondolni és megnézni a dSuite-ban
-			//double dAverageProducedAll = sAggregatedOperation.dProducedQuantity + sAggregatedOperation.dScrapQuantity;
-			//
-			//if( dAverageProducedAll > 0 )
-			//	sMaterialDemand.dPiece = dAverageUsedQuantity / dAverageProducedAll;
-
-			if( dAveragePieceGood > 0 )
-				sMaterialDemand.dPiece = dAverageUsedQuantity / dAveragePieceGood;
+			// átlagos felhasznált mennyiség, súlyozott átlag kerekítve egészre mert diszkrét gyártás
+			sMaterialDemand.dPiece = round( sMaterialConsumption.dUsedQuantity / dTotalProducedQuantity );
 
 			// itt kellene a medián, átlag, szórás
-			// CalculateMaterialConsumptionStatisztics()
+			// CalculateMaterialConsumptionStatistics()
+			// fajlagos anyagfelhasználás, a teljes mennyiséghez viszonyítva
+			//for( const auto& ratio : sMaterialConsumption.vRatios )
+			//{
+			//	sMaterialDemand.vRatios.push_back( ratio );
+			//}
+			//sMaterialDemand.dAverage = std::accumulate( sMaterialDemand.vRatios.begin(), sMaterialDemand.vRatios.end(), 0.0 ) / sMaterialDemand.vRatios.size();
+			//sMaterialDemand.dStdDev = CalculateStdDev();
+			//sMaterialDemand.dMedian = CalculateMedian();
+
 			sRecipeItem.vMaterialDemands.push_back( sMaterialDemand );
 		}
 
@@ -427,6 +382,7 @@ Recipe BaseAlgorithm::BuildRecipe( const Product& sProduct, const std::map<std::
 
 			double dTotalQuantity = sMachineInfo.dProducedQuantity + sMachineInfo.dScrapQuantity;
 
+			// itt kellene a medián, átlag, szórás
 			if( dTotalQuantity > 0 )
 				sMachineDemand.dOperationTime = sMachineInfo.dTotalOperationTime / dTotalQuantity; // átlagos mûveleti idõ
 

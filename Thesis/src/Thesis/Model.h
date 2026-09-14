@@ -160,6 +160,15 @@ struct MaterialDemand
 	double       dPiece = 0.0;
 	double       dBaseQuantity = 1.0;
 	std::string strBaseQuantityUnitId;
+	std::vector<double> vRatios;
+
+	double dMedian;
+	double dAverage; // átlagok átlaga
+	double dWeightedAverage; // súlyozott átlag
+	double dStdDev; // szórás
+	double dMin;
+	double dMax;
+	double dMode; // módusz
 
 	/*bool bMainRawMaterial;
 	bool bAlternativeAllowed;
@@ -200,6 +209,8 @@ struct Recipe
 	std::string strId;
 	std::string strProductId;
 	bool        bDefault = false;
+
+	int iSampleSize = 0;
 
 	std::vector<RecipeItem> vRecipeItems;
 };
